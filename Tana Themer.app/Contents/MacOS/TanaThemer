@@ -1,0 +1,306 @@
+#!/bin/bash
+# ─────────────────────────────────────────────────────────────────────────────
+# Tana Themer — control panel + self-installer
+#
+# Double-clicking the .app runs this script. It shows a native macOS
+# dialog reflecting the current state and offers actions:
+#   • First run: Set Up & Enable (installs daemon + LaunchAgent)
+#   • Running:   Disable when I quit Tana / View logs / Remove / Quit
+#   • Pending:   Cancel disable / View logs / Quit
+#   • Disabled:  Enable / View logs / Remove / Quit
+#
+# The actual injection runs as a background LaunchAgent (no terminal).
+# ─────────────────────────────────────────────────────────────────────────────
+
+set -u
+
+# ── Paths ────────────────────────────────────────────────────────────────────
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+RESOURCES="$(cd "$SCRIPT_DIR/../Resources" && pwd)"
+BUNDLE_DAEMON="$RESOURCES/daemon"
+BUNDLE_PLIST_TEMPLATE="$RESOURCES/plist-template.xml"
+
+LABEL="io.github.hellbendereu.tana-themer"
+APP_SUPPORT="$HOME/Library/Application Support/TanaThemer"
+INSTALL_DAEMON="$APP_SUPPORT/daemon"
+INSTALL_RUN_SH="$APP_SUPPORT/run-daemon.sh"
+STATE_DIR="$APP_SUPPORT/state"
+PLIST_PATH="$HOME/Library/LaunchAgents/$LABEL.plist"
+LOG_PATH="$HOME/Library/Logs/tana-themer.log"
+
+FLAG_ENABLED="$STATE_DIR/enabled"
+FLAG_PENDING_DISABLE="$STATE_DIR/pending_disable"
+FLAG_WAIT_TO_ATTACH="$STATE_DIR/wait_to_attach"
+
+DEBUG_PORT=9222
+
+# ── State helpers ────────────────────────────────────────────────────────────
+is_installed() { [ -d "$APP_SUPPORT" ] && [ -f "$INSTALL_RUN_SH" ]; }
+
+is_enabled() { [ -f "$FLAG_ENABLED" ]; }
+
+is_pending_disable() { [ -f "$FLAG_PENDING_DISABLE" ]; }
+
+is_agent_loaded() {
+    launchctl print "gui/$(id -u)/$LABEL" >/dev/null 2>&1
+}
+
+is_tana_running() {
+    pgrep -x Tana >/dev/null 2>&1
+}
+
+is_cdp_open() {
+    curl -fsS --max-time 1 "http://localhost:$DEBUG_PORT/json" >/dev/null 2>&1
+}
+
+# ── UI helpers (AppleScript dialogs) ─────────────────────────────────────────
+# Returns the button label clicked, or "" if cancelled.
+show_dialog() {
+    local title="$1" message="$2"; shift 2
+    local buttons_applescript=""
+    local default_button=""
+    local i=1
+    for b in "$@"; do
+        if [ -z "$buttons_applescript" ]; then
+            buttons_applescript="\"$b\""
+        else
+            buttons_applescript="$buttons_applescript, \"$b\""
+        fi
+        default_button="$b"
+        i=$((i+1))
+    done
+
+    osascript <<APPLESCRIPT 2>/dev/null
+try
+    set theResult to display dialog "$message" with title "$title" buttons {$buttons_applescript} default button "$default_button" with icon note
+    return button returned of theResult
+on error number -128
+    return ""
+end try
+APPLESCRIPT
+}
+
+show_alert() {
+    local title="$1" message="$2"
+    osascript -e "display dialog \"$message\" with title \"$title\" buttons {\"OK\"} default button \"OK\" with icon note" >/dev/null 2>&1
+}
+
+show_error() {
+    local title="$1" message="$2"
+    osascript -e "display dialog \"$message\" with title \"$title\" buttons {\"OK\"} default button \"OK\" with icon stop" >/dev/null 2>&1
+}
+
+# ── Install / uninstall ──────────────────────────────────────────────────────
+install_files() {
+    mkdir -p "$APP_SUPPORT" "$STATE_DIR"
+    rm -rf "$INSTALL_DAEMON"
+    mkdir -p "$INSTALL_DAEMON"
+
+    # Copy daemon source + node_modules into Application Support.
+    if ! cp -R "$BUNDLE_DAEMON/." "$INSTALL_DAEMON/"; then
+        show_error "Tana Themer" "Failed to copy daemon files."
+        exit 1
+    fi
+
+    # Copy the run-daemon.sh wrapper.
+    cp "$RESOURCES/run-daemon.sh" "$INSTALL_RUN_SH"
+    chmod +x "$INSTALL_RUN_SH"
+
+    # Render the plist from the template.
+    mkdir -p "$(dirname "$PLIST_PATH")"
+    sed \
+        -e "s|__RUN_DAEMON_SH__|$INSTALL_RUN_SH|g" \
+        -e "s|__LOG_PATH__|$LOG_PATH|g" \
+        "$BUNDLE_PLIST_TEMPLATE" > "$PLIST_PATH"
+}
+
+load_agent() {
+    # bootstrap may fail if already loaded — that's fine.
+    launchctl bootstrap "gui/$(id -u)" "$PLIST_PATH" 2>/dev/null || true
+    launchctl enable "gui/$(id -u)/$LABEL" 2>/dev/null || true
+    launchctl kickstart -k "gui/$(id -u)/$LABEL" 2>/dev/null || true
+}
+
+unload_agent() {
+    launchctl bootout "gui/$(id -u)" "$PLIST_PATH" 2>/dev/null || true
+}
+
+set_enabled()  { mkdir -p "$STATE_DIR"; : > "$FLAG_ENABLED"; }
+clear_enabled() { rm -f "$FLAG_ENABLED"; }
+set_pending_disable() { mkdir -p "$STATE_DIR"; : > "$FLAG_PENDING_DISABLE"; }
+clear_pending_disable() { rm -f "$FLAG_PENDING_DISABLE"; }
+set_wait_to_attach() { mkdir -p "$STATE_DIR"; : > "$FLAG_WAIT_TO_ATTACH"; }
+clear_wait_to_attach() { rm -f "$FLAG_WAIT_TO_ATTACH"; }
+
+remove_completely() {
+    unload_agent
+    rm -f "$PLIST_PATH"
+    rm -rf "$APP_SUPPORT"
+    rm -f "$LOG_PATH"
+}
+
+# Used when Disable is clicked while Tana is NOT running — no active session
+# to protect, so disable immediately rather than deferring.
+disable_now() {
+    clear_enabled
+    clear_pending_disable
+    clear_wait_to_attach
+    unload_agent
+}
+
+# ── Action handlers ──────────────────────────────────────────────────────────
+action_first_run_setup() {
+    install_files
+    set_enabled
+    handle_enable_when_tana_running_check  # may set wait_to_attach
+    load_agent
+    show_alert "Tana Themer" "Tana Themer is now enabled and will auto-start at login."
+}
+
+# Shared logic: when enabling and Tana is already running without the debug
+# port, ask the user whether to restart now or wait for next launch.
+handle_enable_when_tana_running_check() {
+    if is_tana_running && ! is_cdp_open; then
+        local answer
+        answer=$(show_dialog "Tana Themer" \
+            "Tana is already running. To apply the theme to this session, Tana needs to be restarted.\n\nRestart Tana now, or wait until you next launch it?" \
+            "Wait until next launch" "Restart Tana now")
+        case "$answer" in
+            "Restart Tana now")
+                clear_wait_to_attach
+                # Daemon will see Tana running without CDP and relaunch with the flag.
+                ;;
+            "Wait until next launch"|"")
+                set_wait_to_attach
+                ;;
+        esac
+    else
+        clear_wait_to_attach
+    fi
+}
+
+action_enable() {
+    set_enabled
+    clear_pending_disable
+    handle_enable_when_tana_running_check
+    load_agent
+}
+
+action_disable() {
+    if is_tana_running; then
+        set_pending_disable
+        show_alert "Tana Themer" \
+            "Tana Themer will disable automatically when you quit Tana.\n\nYou can keep working in Tana with the theme until then."
+    else
+        disable_now
+        show_alert "Tana Themer" "Tana Themer has been disabled."
+    fi
+}
+
+action_cancel_disable() {
+    clear_pending_disable
+    show_alert "Tana Themer" "Disable cancelled — Tana Themer will stay enabled."
+}
+
+action_view_logs() {
+    if [ -f "$LOG_PATH" ]; then
+        open -a Console "$LOG_PATH"
+    else
+        show_alert "Tana Themer" "No log file yet at:\n$LOG_PATH"
+    fi
+}
+
+action_remove_completely() {
+    local answer
+    answer=$(show_dialog "Tana Themer" \
+        "Remove Tana Themer completely?\n\nThis will:\n  • Disable the background agent\n  • Delete installed daemon files\n  • Delete the log file\n\nThe Tana Themer.app itself will remain — drag it to the Trash to finish removal." \
+        "Cancel" "Remove")
+    if [ "$answer" = "Remove" ]; then
+        remove_completely
+        show_alert "Tana Themer" "Tana Themer has been removed.\n\nYou can now drag Tana Themer.app to the Trash."
+    fi
+}
+
+# ── Main flow: pick the right dialog for the current state ───────────────────
+build_status_lines() {
+    local lines=""
+    if is_pending_disable; then
+        lines="Status:   Will disable when you quit Tana"
+    elif is_enabled && is_agent_loaded; then
+        lines="Status:   Running (auto-starts at login)"
+    elif is_enabled; then
+        lines="Status:   Enabled but agent not loaded"
+    else
+        lines="Status:   Disabled"
+    fi
+
+    if is_tana_running; then
+        if is_cdp_open; then
+            lines="$lines\nTana:     Connected"
+        else
+            if [ -f "$FLAG_WAIT_TO_ATTACH" ]; then
+                lines="$lines\nTana:     Running — will attach at next launch"
+            else
+                lines="$lines\nTana:     Running"
+            fi
+        fi
+    else
+        lines="$lines\nTana:     Not running"
+    fi
+    echo "$lines"
+}
+
+main_dialog() {
+    if ! is_installed; then
+        local answer
+        answer=$(show_dialog "Tana Themer" \
+            "Tana Themer isn't set up yet.\n\nClicking Set Up & Enable will:\n  • Install the background helper to ~/Library/Application Support/TanaThemer\n  • Register a LaunchAgent so it auto-starts at login\n  • Start applying your theme to Tana\n\nNo terminal window will appear." \
+            "Cancel" "Set Up & Enable")
+        if [ "$answer" = "Set Up & Enable" ]; then
+            action_first_run_setup
+        fi
+        return
+    fi
+
+    local status_lines
+    status_lines=$(build_status_lines)
+    local message="Tana Themer\n\n$status_lines"
+
+    if is_pending_disable; then
+        local answer
+        answer=$(show_dialog "Tana Themer" \
+            "$message\n\nDisable is pending — Tana Themer will turn off automatically when you quit Tana." \
+            "View logs" "Quit" "Cancel disable")
+        case "$answer" in
+            "Cancel disable")     action_cancel_disable ;;
+            "View logs")          action_view_logs ;;
+        esac
+        return
+    fi
+
+    if is_enabled; then
+        local answer
+        answer=$(show_dialog "Tana Themer" \
+            "$message" \
+            "Remove completely" "View logs" "Disable when I quit Tana" "Quit")
+        case "$answer" in
+            "Disable when I quit Tana") action_disable ;;
+            "View logs")                action_view_logs ;;
+            "Remove completely")        action_remove_completely ;;
+        esac
+        return
+    fi
+
+    # Disabled (but installed)
+    local answer
+    answer=$(show_dialog "Tana Themer" \
+        "$message" \
+        "Remove completely" "View logs" "Quit" "Enable")
+    case "$answer" in
+        "Enable")            action_enable ;;
+        "View logs")         action_view_logs ;;
+        "Remove completely") action_remove_completely ;;
+    esac
+}
+
+main_dialog

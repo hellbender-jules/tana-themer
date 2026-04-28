@@ -1,0 +1,18 @@
+# Dependencies
+node_modules/
+
+# Build artifacts
+dist/
+
+# macOS
+.DS_Store
+
+# Logs / runtime
+*.log
+.injector.pid
+
+# Editor / OS
+.vscode/
+.idea/
+*.swp
+Thumbs.db
