@@ -5,6 +5,26 @@ All notable changes to Tana Themer are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.0.1] — 2026-04-29
+
+### Fixed
+- **Control panel dialog never appeared** in the *Enabled* and
+  *Disabled (but installed)* states. AppleScript's `display dialog`
+  is hard-limited to 3 buttons; v3.0.0 was trying to show 4 (Remove
+  completely / View logs / primary action / Quit), so the script
+  errored out silently and the .app exited without rendering
+  anything. Each state now shows ≤3 buttons, with **View logs** and
+  **Remove completely** tucked behind a *More options…* submenu.
+  Pressing Esc on any dialog dismisses it cleanly.
+
+### Changed
+- AppleScript stderr is no longer swallowed — dispatcher errors are
+  appended to `~/Library/Logs/tana-themer.log` so future regressions
+  are debuggable.
+- *Remove completely* now also unloads the legacy `xyz.inness`
+  LaunchAgent (if present from a pre-3.0.1 install) and `pkill`s any
+  stray helper process.
+
 ## [3.0.0] — 2026-04-28
 
 First public release.

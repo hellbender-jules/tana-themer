@@ -3,16 +3,21 @@
 # Tana Themer — control panel + self-installer
 #
 # Double-clicking the .app runs this script. It shows a native macOS
-# dialog reflecting the current state and offers actions:
-#   • First run: Set Up & Enable (installs daemon + LaunchAgent)
-#   • Running:   Disable when I quit Tana / View logs / Remove / Quit
-#   • Pending:   Cancel disable / View logs / Quit
-#   • Disabled:  Enable / View logs / Remove / Quit
+# dialog reflecting the current state and offers actions.
+#
+# AppleScript display dialog supports a maximum of 3 buttons, so each
+# state surfaces its primary action plus a "More options…" submenu
+# (containing View logs / Remove completely). Pressing Esc on any
+# dialog dismisses without action.
 #
 # The actual injection runs as a background LaunchAgent (no terminal).
 # ─────────────────────────────────────────────────────────────────────────────
 
 set -u
+
+# Old bundle ID, kept here so Remove completely also cleans up any
+# pre-3.0.1 install that registered under the previous identifier.
+LEGACY_LABEL="xyz.inness.tana-themer"
 
 # ── Paths ────────────────────────────────────────────────────────────────────
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
@@ -54,12 +59,22 @@ is_cdp_open() {
 }
 
 # ── UI helpers (AppleScript dialogs) ─────────────────────────────────────────
-# Returns the button label clicked, or "" if cancelled.
+log_dispatcher_error() {
+    mkdir -p "$(dirname "$LOG_PATH")"
+    {
+        echo ""
+        echo "[$(date '+%Y-%m-%dT%H:%M:%S%z')] dispatcher: $*"
+    } >> "$LOG_PATH"
+}
+
+# Show a 1-3 button dialog. Args: title, message, cancel_btn, btn1 [btn2 [btn3]]
+# Convention: leftmost button is the cancel target (Esc closes via -128).
+# Rightmost button is the default (Return triggers it).
+# Returns the button label clicked on stdout, or "" if Esc/cancel.
 show_dialog() {
-    local title="$1" message="$2"; shift 2
+    local title="$1" message="$2" cancel_btn="$3"; shift 3
     local buttons_applescript=""
     local default_button=""
-    local i=1
     for b in "$@"; do
         if [ -z "$buttons_applescript" ]; then
             buttons_applescript="\"$b\""
@@ -67,27 +82,32 @@ show_dialog() {
             buttons_applescript="$buttons_applescript, \"$b\""
         fi
         default_button="$b"
-        i=$((i+1))
     done
 
-    osascript <<APPLESCRIPT 2>/dev/null
+    mkdir -p "$(dirname "$LOG_PATH")"
+    local result
+    result=$(osascript <<APPLESCRIPT 2>>"$LOG_PATH"
 try
-    set theResult to display dialog "$message" with title "$title" buttons {$buttons_applescript} default button "$default_button" with icon note
+    set theResult to display dialog "$message" with title "$title" buttons {$buttons_applescript} default button "$default_button" cancel button "$cancel_btn" with icon note
     return button returned of theResult
 on error number -128
     return ""
 end try
 APPLESCRIPT
+)
+    echo "$result"
 }
 
 show_alert() {
     local title="$1" message="$2"
-    osascript -e "display dialog \"$message\" with title \"$title\" buttons {\"OK\"} default button \"OK\" with icon note" >/dev/null 2>&1
+    mkdir -p "$(dirname "$LOG_PATH")"
+    osascript -e "display dialog \"$message\" with title \"$title\" buttons {\"OK\"} default button \"OK\" with icon note" >/dev/null 2>>"$LOG_PATH"
 }
 
 show_error() {
     local title="$1" message="$2"
-    osascript -e "display dialog \"$message\" with title \"$title\" buttons {\"OK\"} default button \"OK\" with icon stop" >/dev/null 2>&1
+    mkdir -p "$(dirname "$LOG_PATH")"
+    osascript -e "display dialog \"$message\" with title \"$title\" buttons {\"OK\"} default button \"OK\" with icon stop" >/dev/null 2>>"$LOG_PATH"
 }
 
 # ── Install / uninstall ──────────────────────────────────────────────────────
@@ -133,8 +153,17 @@ set_wait_to_attach() { mkdir -p "$STATE_DIR"; : > "$FLAG_WAIT_TO_ATTACH"; }
 clear_wait_to_attach() { rm -f "$FLAG_WAIT_TO_ATTACH"; }
 
 remove_completely() {
+    # Unload current label and any legacy label, in case this install
+    # came from a pre-3.0.1 build.
     unload_agent
+    launchctl bootout "gui/$(id -u)" "$HOME/Library/LaunchAgents/$LEGACY_LABEL.plist" 2>/dev/null || true
+
+    # Kill any stray daemon process (current or legacy).
+    pkill -f tana-themer-daemon.js 2>/dev/null || true
+    pkill -f desktop-inject.js 2>/dev/null || true
+
     rm -f "$PLIST_PATH"
+    rm -f "$HOME/Library/LaunchAgents/$LEGACY_LABEL.plist"
     rm -rf "$APP_SUPPORT"
     rm -f "$LOG_PATH"
 }
@@ -164,6 +193,7 @@ handle_enable_when_tana_running_check() {
         local answer
         answer=$(show_dialog "Tana Themer" \
             "Tana is already running. To apply the theme to this session, Tana needs to be restarted.\n\nRestart Tana now, or wait until you next launch it?" \
+            "Wait until next launch" \
             "Wait until next launch" "Restart Tana now")
         case "$answer" in
             "Restart Tana now")
@@ -213,12 +243,27 @@ action_view_logs() {
 action_remove_completely() {
     local answer
     answer=$(show_dialog "Tana Themer" \
-        "Remove Tana Themer completely?\n\nThis will:\n  • Disable the background agent\n  • Delete installed daemon files\n  • Delete the log file\n\nThe Tana Themer.app itself will remain — drag it to the Trash to finish removal." \
+        "Remove Tana Themer completely?\n\nThis will:\n  • Disable the background agent\n  • Stop any running helper process\n  • Delete installed daemon files\n  • Delete the log file\n\nThe Tana Themer.app itself will remain — drag it to the Trash to finish removal." \
+        "Cancel" \
         "Cancel" "Remove")
     if [ "$answer" = "Remove" ]; then
         remove_completely
         show_alert "Tana Themer" "Tana Themer has been removed.\n\nYou can now drag Tana Themer.app to the Trash."
     fi
+}
+
+# Submenu shown when user clicks "More options…" from the main dialog.
+show_more_options_menu() {
+    local answer
+    answer=$(show_dialog "Tana Themer" \
+        "More options" \
+        "Back" \
+        "Back" "Remove completely" "View logs")
+    case "$answer" in
+        "View logs")          action_view_logs ;;
+        "Remove completely")  action_remove_completely ;;
+        # "Back" or "" → return to caller, which will exit
+    esac
 }
 
 # ── Main flow: pick the right dialog for the current state ───────────────────
@@ -254,7 +299,8 @@ main_dialog() {
     if ! is_installed; then
         local answer
         answer=$(show_dialog "Tana Themer" \
-            "Tana Themer isn't set up yet.\n\nClicking Set Up & Enable will:\n  • Install the background helper to ~/Library/Application Support/TanaThemer\n  • Register a LaunchAgent so it auto-starts at login\n  • Start applying your theme to Tana\n\nNo terminal window will appear." \
+            "Tana Themer isn't set up yet.\n\nClicking Set Up & Enable will:\n  • Install the background helper to ~/Library/Application Support/TanaThemer\n  • Register a LaunchAgent so it auto-starts at login\n  • Start applying your theme to Tana\n\nNo terminal window will appear.\n\n(Press Esc to close without changes.)" \
+            "Cancel" \
             "Cancel" "Set Up & Enable")
         if [ "$answer" = "Set Up & Enable" ]; then
             action_first_run_setup
@@ -264,13 +310,14 @@ main_dialog() {
 
     local status_lines
     status_lines=$(build_status_lines)
-    local message="Tana Themer\n\n$status_lines"
+    local message="Tana Themer\n\n$status_lines\n\n(Press Esc to close without changes.)"
 
     if is_pending_disable; then
         local answer
         answer=$(show_dialog "Tana Themer" \
             "$message\n\nDisable is pending — Tana Themer will turn off automatically when you quit Tana." \
-            "View logs" "Quit" "Cancel disable")
+            "Close" \
+            "Close" "View logs" "Cancel disable")
         case "$answer" in
             "Cancel disable")     action_cancel_disable ;;
             "View logs")          action_view_logs ;;
@@ -282,11 +329,11 @@ main_dialog() {
         local answer
         answer=$(show_dialog "Tana Themer" \
             "$message" \
-            "Remove completely" "View logs" "Disable when I quit Tana" "Quit")
+            "Close" \
+            "More options…" "Close" "Disable when I quit Tana")
         case "$answer" in
             "Disable when I quit Tana") action_disable ;;
-            "View logs")                action_view_logs ;;
-            "Remove completely")        action_remove_completely ;;
+            "More options…")            show_more_options_menu ;;
         esac
         return
     fi
@@ -295,11 +342,11 @@ main_dialog() {
     local answer
     answer=$(show_dialog "Tana Themer" \
         "$message" \
-        "Remove completely" "View logs" "Quit" "Enable")
+        "Close" \
+        "More options…" "Close" "Enable")
     case "$answer" in
-        "Enable")            action_enable ;;
-        "View logs")         action_view_logs ;;
-        "Remove completely") action_remove_completely ;;
+        "Enable")        action_enable ;;
+        "More options…") show_more_options_menu ;;
     esac
 }
 
