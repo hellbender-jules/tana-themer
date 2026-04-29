@@ -28,6 +28,8 @@ const STATE_DIR  = process.env.TT_STATE_DIR  ||
                    path.join(HOME, 'Library/Application Support/TanaThemer/state');
 const PLIST_PATH = process.env.TT_PLIST_PATH ||
                    path.join(HOME, 'Library/LaunchAgents/io.github.hellbendereu.tana-themer.plist');
+const USER_THEMES_DIR = process.env.TT_USER_THEMES_DIR ||
+                   path.join(HOME, 'Library/Application Support/TanaThemer/user-themes');
 const DAEMON_DIR = __dirname;
 
 const flags = {
@@ -36,9 +38,66 @@ const flags = {
   waitToAttach:   path.join(STATE_DIR, 'wait_to_attach'),
 };
 
-const { THEMES } = require('./themes.js');
+const { THEMES: BUILTIN_THEMES } = require('./themes.js');
 const UI_SCRIPT  = fs.readFileSync(path.join(DAEMON_DIR, 'desktop-ui.js'), 'utf8');
-const THEMES_INJECTION = `window.__TT_THEMES__ = ${JSON.stringify(THEMES)};`;
+
+// Load user-supplied themes from ~/Library/Application Support/TanaThemer/user-themes/*.json
+// and merge with the built-ins. User themes override built-ins by id.
+// Called fresh on each connectAndInject() so adding a JSON file and
+// restarting Tana picks it up — no daemon restart needed.
+function loadUserThemes() {
+  const merged = { ...BUILTIN_THEMES };
+  let entries;
+  try {
+    entries = fs.readdirSync(USER_THEMES_DIR);
+  } catch (_) {
+    return merged; // directory doesn't exist yet — fine
+  }
+
+  for (const filename of entries) {
+    if (!filename.endsWith('.json')) continue;
+    const filepath = path.join(USER_THEMES_DIR, filename);
+    let theme;
+    try {
+      theme = JSON.parse(fs.readFileSync(filepath, 'utf8'));
+    } catch (err) {
+      log(`user-themes/${filename}: skipping, invalid JSON: ${err.message}`);
+      continue;
+    }
+    const problems = validateTheme(theme);
+    if (problems.length) {
+      log(`user-themes/${filename}: skipping, ${problems.join('; ')}`);
+      continue;
+    }
+    if (merged[theme.id] && !BUILTIN_THEMES[theme.id]) {
+      log(`user-themes/${filename}: id '${theme.id}' duplicated by another user theme — last one wins`);
+    } else if (BUILTIN_THEMES[theme.id]) {
+      log(`user-themes/${filename}: overriding built-in theme '${theme.id}'`);
+    }
+    merged[theme.id] = theme;
+  }
+  return merged;
+}
+
+function validateTheme(t) {
+  const problems = [];
+  if (!t || typeof t !== 'object') return ['not an object'];
+  if (typeof t.id !== 'string' || !t.id.trim()) problems.push('missing id (string)');
+  if (typeof t.name !== 'string' || !t.name.trim()) problems.push('missing name (string)');
+  if (t.mode !== 'light' && t.mode !== 'dark') problems.push("mode must be 'light' or 'dark'");
+  if (t.preview !== undefined && (!Array.isArray(t.preview) || !t.preview.every((c) => typeof c === 'string'))) {
+    problems.push('preview must be an array of colour strings');
+  }
+  if (!t.vars || typeof t.vars !== 'object' || Array.isArray(t.vars)) {
+    problems.push('missing vars (object)');
+  }
+  return problems;
+}
+
+function buildThemesInjection() {
+  const allThemes = loadUserThemes();
+  return `window.__TT_THEMES__ = ${JSON.stringify(allThemes)};`;
+}
 
 let ws            = null;
 let wsUrl         = null;
@@ -107,8 +166,10 @@ function cdpCommand(socket, method, params = {}) {
 
 async function inject(socket) {
   try {
+    // Rebuild themes each inject so user-themes/ JSON edits are
+    // picked up on the next page navigation, not just at startup.
     await cdpCommand(socket, 'Runtime.evaluate', {
-      expression: THEMES_INJECTION,
+      expression: buildThemesInjection(),
       returnByValue: false,
     });
     const result = await cdpCommand(socket, 'Runtime.evaluate', {

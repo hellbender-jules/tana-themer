@@ -585,6 +585,7 @@
       },
     },
 
+    // ── Add new built-in themes above this line (used by scripts/new-theme.sh) ──
   };
 
   // ============================================================

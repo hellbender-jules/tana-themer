@@ -2,7 +2,7 @@
 
 Custom themes for [Tana](https://app.tana.inc) — works in both the **browser** (via Tampermonkey) and the **macOS desktop app** (via CDP injection).
 
-> **Status:** v3.0.1, MIT-licensed. Tested on macOS 14+ with Tana 1.0+ and Node.js 18+. Not affiliated with Tana.
+> **Status:** v3.1.0, MIT-licensed. Tested on macOS 14+ with Tana 1.0+ and Node.js 18+. Not affiliated with Tana.
 
 ## Themes included
 
@@ -103,6 +103,7 @@ Theme preference is saved to Tana's own `localStorage`, so your choice persists 
 |---|---|
 | `/Applications/Tana Themer.app` | The control-panel app |
 | `~/Library/Application Support/TanaThemer/daemon/` | Active daemon code |
+| `~/Library/Application Support/TanaThemer/user-themes/` | Drop `*.json` files here for personal themes (desktop only) |
 | `~/Library/LaunchAgents/io.github.hellbendereu.tana-themer.plist` | LaunchAgent registration |
 | `~/Library/Logs/tana-themer.log` | Daemon stdout/stderr |
 
@@ -118,21 +119,63 @@ The injected CSS and picker UI are open-source in this repo and execute entirely
 
 If you find a vulnerability, please open a GitHub issue (or, for sensitive reports, contact the repo owner privately).
 
-## Contributing
+## Adding themes
 
-Pull requests welcome. For new themes, edit both `themes.js` (desktop) and the `THEMES` object in `tana-themer.user.js` (browser) — they're kept in sync manually.
+There are two paths depending on whether the theme is for **you only** or for **everyone using Tana Themer**.
 
-## License
+### Path A — Personal themes (desktop only, no rebuild)
 
-[MIT](LICENSE) — © 2026 hellbender-jules
+Drop a `.json` file into `~/Library/Application Support/TanaThemer/user-themes/`, restart Tana, done. The directory is created on Set Up & Enable and contains a `README.txt` and an `EXAMPLE.json.disabled` you can rename to `.json` and tweak.
 
-## How to add a theme
+**JSON schema:**
 
-**Browser:** edit the `THEMES` object in `tana-themer.user.js`.
-**Desktop:** edit `themes.js` (the single source of truth for the Node injector).
-If you use both, add the theme in both files.
+```json
+{
+  "id":      "my-personal-theme",
+  "name":    "My Personal Theme",
+  "mode":    "dark",
+  "preview": ["#1a1b26", "#7aa2f7", "#c0caf5"],
+  "vars": {
+    "--colorPanelBackground":     "#1a1b26",
+    "--colorPanelBackgroundDimmed": "#16171f",
+    "--colorEditorText":          "#c0caf5",
+    "--colorLink":                "#7aa2f7"
+  }
+}
+```
 
-Open the relevant file and add an entry to the `THEMES` object:
+**Rules:**
+- `id` must be unique. Using the same id as a built-in theme **replaces** the built-in for your install.
+- `mode` must be `"light"` or `"dark"`.
+- `vars` is any subset of the [CSS variables listed below](#key-variables) — you don't need them all.
+- Invalid JSON or missing required fields → file is **silently skipped** and a reason is appended to `~/Library/Logs/tana-themer.log`. Other themes still load.
+- Themes are reloaded each time the daemon attaches to Tana — quit Tana and reopen it to pick up new files. (Disable → Enable from the .app forces a daemon restart if needed.)
+
+This path **only affects the desktop app**. The browser userscript has its themes embedded — see Path B if you want a theme available in both.
+
+### Path B — Built-in themes (shipped with the project, browser + desktop)
+
+Built-ins live in `themes.js` (desktop) and the embedded `THEMES` object in `tana-themer.user.js` (browser). The two are kept in sync manually — there's a scaffold script that does the boilerplate for you.
+
+**One command:**
+
+```bash
+bash scripts/new-theme.sh "Solarized Dark"
+# add `light` as a second arg if you want a light theme
+```
+
+This appends a working starter entry to **both** files at the right spot, slugifies the id (`solarized-dark`), runs `node --check` on the result, and prints next steps. Then:
+
+1. Open `themes.js` and `tana-themer.user.js`, find the new block (search for the theme name), and tune the colour values.
+2. Run `bash scripts/install.sh` to rebuild and reinstall the desktop helper.
+3. Re-paste `tana-themer.user.js` into Tampermonkey if you also use the browser version.
+4. Open Tana → click 🎨 → pick your new theme.
+
+If you'd like your theme included for everyone, open a pull request — the scaffold output is exactly the form expected.
+
+### Manual approach (Path B by hand)
+
+If you'd rather edit the files directly, add an entry to the `THEMES` object in both files:
 
 ```js
 'my-theme': {
@@ -149,7 +192,11 @@ Open the relevant file and add an entry to the `THEMES` object:
 },
 ```
 
+Insert above the `// ── Add new built-in themes above this line ──` marker comment in both files.
+
 ### Key variables
+
+The variables you can put inside `vars` (Path A or B). All optional — set as many or as few as you like.
 
 | Variable | Controls |
 |---|---|
@@ -179,10 +226,19 @@ Tana uses a two-layer system:
 - **Primitive palette** — fixed color scales (`--colorGray100` … `--colorGray975`, etc.)
 - **Semantic tokens** — the variables above, which reference the palette
 
-You can reference Tana's primitives in your vars:
+You can reference Tana's primitives in your values:
+
 ```js
-'--colorLink': 'var(--colorGreen400)',
+'--colorLink': 'var(--colorGreen400)'
 ```
+
+## Contributing
+
+Pull requests welcome. The fastest way to add a new built-in theme is `bash scripts/new-theme.sh "Your Theme Name"` — see [Adding themes › Path B](#path-b--built-in-themes-shipped-with-the-project-browser--desktop) above.
+
+## License
+
+[MIT](LICENSE) — © 2026 hellbender-jules
 
 ## How it works
 

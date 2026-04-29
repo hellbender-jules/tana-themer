@@ -132,6 +132,63 @@ install_files() {
         -e "s|__RUN_DAEMON_SH__|$INSTALL_RUN_SH|g" \
         -e "s|__LOG_PATH__|$LOG_PATH|g" \
         "$BUNDLE_PLIST_TEMPLATE" > "$PLIST_PATH"
+
+    # Set up the user-themes directory with a README + disabled
+    # example file. Drop a .json file here and restart Tana to pick
+    # it up — no daemon restart needed.
+    local user_themes_dir="$APP_SUPPORT/user-themes"
+    mkdir -p "$user_themes_dir"
+    if [ ! -f "$user_themes_dir/README.txt" ]; then
+        cat > "$user_themes_dir/README.txt" <<'EOF'
+Tana Themer — Personal themes
+==============================
+
+Drop a .json file in this directory to add a personal theme.
+Restart Tana (quit and reopen) to load new themes — no daemon
+restart needed. Invalid files are skipped and logged to
+~/Library/Logs/tana-themer.log.
+
+Schema (see EXAMPLE.json.disabled for a working starter):
+
+    {
+      "id":      "<kebab-case-id>",      // required, unique
+      "name":    "<Display Name>",       // required
+      "mode":    "dark",                 // required: "light" or "dark"
+      "preview": ["#hex1", "#hex2", "#hex3"],  // 3 swatch colours
+      "vars": {
+        "--colorPanelBackground": "#...",
+        "--colorEditorText":      "#...",
+        ...
+      }
+    }
+
+A user theme with the same id as a built-in REPLACES the built-in
+for your install. The repository's themes.js is untouched.
+
+For the full list of CSS variables, see the README in the
+Tana Themer GitHub repo.
+EOF
+    fi
+    if [ ! -f "$user_themes_dir/EXAMPLE.json.disabled" ]; then
+        cat > "$user_themes_dir/EXAMPLE.json.disabled" <<'EOF'
+{
+  "id":      "my-personal-theme",
+  "name":    "My Personal Theme",
+  "mode":    "dark",
+  "preview": ["#1a1b26", "#7aa2f7", "#c0caf5"],
+  "vars": {
+    "--colorPanelBackground":         "#1a1b26",
+    "--colorPanelBackgroundDimmed":   "#16171f",
+    "--colorEditorText":              "#c0caf5",
+    "--colorEditorTextHighlight":     "#ffffff",
+    "--colorEditorTextMuted":         "#7d8195",
+    "--colorUIText":                  "#c0caf5",
+    "--colorLink":                    "#7aa2f7",
+    "--colorFocus":                   "#7aa2f7"
+  }
+}
+EOF
+    fi
 }
 
 load_agent() {
@@ -179,11 +236,19 @@ disable_now() {
 
 # ── Action handlers ──────────────────────────────────────────────────────────
 action_first_run_setup() {
+    action_enable_quiet
+    show_alert "Tana Themer" "Tana Themer is now enabled and will auto-start at login.\n\nTip: drop .json files into\n~/Library/Application Support/TanaThemer/user-themes/\nto add personal themes (see README.txt there)."
+}
+
+# Shared internal: install/refresh daemon code, set state, load agent.
+# Always re-runs install_files so an Enable cycle picks up new daemon
+# code after upgrading the .app — no separate refresh flow needed.
+action_enable_quiet() {
     install_files
     set_enabled
+    clear_pending_disable
     handle_enable_when_tana_running_check  # may set wait_to_attach
     load_agent
-    show_alert "Tana Themer" "Tana Themer is now enabled and will auto-start at login."
 }
 
 # Shared logic: when enabling and Tana is already running without the debug
@@ -210,10 +275,7 @@ handle_enable_when_tana_running_check() {
 }
 
 action_enable() {
-    set_enabled
-    clear_pending_disable
-    handle_enable_when_tana_running_check
-    load_agent
+    action_enable_quiet
 }
 
 action_disable() {

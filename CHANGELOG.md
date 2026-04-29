@@ -5,6 +5,35 @@ All notable changes to Tana Themer are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.1.0] — 2026-04-29
+
+### Added
+- **Personal themes** (desktop). Drop a `.json` file into
+  `~/Library/Application Support/TanaThemer/user-themes/` and it
+  appears in the picker on next Tana launch — no rebuild, no daemon
+  restart, no editing source files. Invalid files are skipped and
+  the reason is logged to `~/Library/Logs/tana-themer.log`. A user
+  theme with the same `id` as a built-in replaces the built-in for
+  that install.
+- **Set Up & Enable** now provisions the `user-themes/` directory
+  with a `README.txt` (schema docs) and `EXAMPLE.json.disabled`
+  (rename to `.json` and tweak — instant theme).
+- **`scripts/new-theme.sh "Theme Name" [light|dark]`** — scaffold
+  script for adding new built-in themes. Inserts a working starter
+  entry into both `themes.js` (desktop) and `tana-themer.user.js`
+  (browser) at the right spot, slugifies the id, and runs
+  `node --check` to confirm the result still parses. Optional
+  second argument selects light or dark mode (default: dark).
+- README rewritten with a clear two-path "Adding themes" section:
+  Path A (personal, desktop-only, JSON drop-in) and Path B (built-in,
+  shared, scaffold script).
+
+### Changed
+- The Enable action now always re-runs `install_files`, so dropping
+  a new `.app` build into `/Applications` and toggling Disable →
+  Enable fully refreshes the installed daemon code. Previously an
+  upgrade required Remove completely + Set Up & Enable.
+
 ## [3.0.1] — 2026-04-29
 
 ### Fixed
