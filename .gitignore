@@ -16,3 +16,11 @@ dist/
 .idea/
 *.swp
 Thumbs.db
+
+# Code-signing / notarization secrets — never commit
+*.p8
+*.p12
+*.pem
+*.cer
+notarization-*.json
+notarization.log

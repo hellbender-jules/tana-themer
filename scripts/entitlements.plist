@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <!-- Tana Themer is a bash + AppleScript dispatcher that spawns
+         node as a child process. It does not load third-party
+         dylibs, JIT-compile code, or send Apple Events to scriptable
+         apps, so it needs no special hardened-runtime exceptions.
+
+         If notarization later flags something we missed, add the
+         minimal entitlement(s) here. Keep this file empty by
+         default — broader entitlements weaken the security model. -->
+</dict>
+</plist>

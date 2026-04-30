@@ -2,7 +2,7 @@
 
 Custom themes for [Tana](https://app.tana.inc) — works in both the **browser** (via Tampermonkey) and the **macOS desktop app** (via CDP injection).
 
-> **Status:** v3.1.0, MIT-licensed. Tested on macOS 14+ with Tana 1.0+ and Node.js 18+. Not affiliated with Tana.
+> **Status:** v3.1.1, MIT-licensed, signed + notarized. Tested on macOS 14+ with Tana 1.0+ and Node.js 18+. Not affiliated with Tana.
 
 ## Themes included
 
@@ -40,10 +40,17 @@ The desktop version runs as a silent background helper (LaunchAgent) — no term
 1. Download the latest `tana-themer-*.zip` from the [Releases page](https://github.com/hellbender-jules/tana-themer/releases/latest)
 2. Unzip it — you'll get `Tana Themer.app`
 3. Drag `Tana Themer.app` to `/Applications`
-4. **First launch:** right-click the app in `/Applications` → **Open** → click **Open** in the Gatekeeper dialog (the app is unsigned, so macOS asks you to confirm)
+4. Double-click it
 5. Click **Set Up & Enable** in the dialog that appears
 
 That's it. The helper runs in the background, auto-starts at login, and applies your theme to Tana whenever Tana is launched.
+
+The release builds are **code-signed with a Developer ID and notarized by Apple**, so Gatekeeper opens them without prompts on macOS 11+ (including Sequoia, which removed the right-click → Open bypass for unsigned apps). To verify before installing:
+
+```bash
+spctl -a -vv --type execute "/path/to/Tana Themer.app"
+# expected: accepted, source=Notarized Developer ID
+```
 
 ### Build from source
 

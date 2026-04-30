@@ -5,6 +5,30 @@ All notable changes to Tana Themer are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.1.1] — 2026-04-29
+
+### Changed
+- **The `.app` is now code-signed with a Developer ID and notarized
+  by Apple.** macOS 15 (Sequoia) had removed the right-click → Open
+  Gatekeeper bypass — unsigned apps could only be opened via System
+  Settings → Privacy & Security. Signed + notarized builds open with
+  a single double-click and no Gatekeeper dialogs at all, online or
+  offline (notarization ticket is stapled to the bundle).
+- New `scripts/sign-and-notarize.sh` automates the whole release
+  pipeline: clean xattrs, sign all inner scripts + the bundle with
+  hardened runtime + secure timestamp, submit to Apple's notary
+  service, staple, verify with `spctl`, and rebuild the dist zip.
+- `scripts/entitlements.plist` is intentionally empty — Tana Themer
+  needs no special hardened-runtime exceptions, keeping the security
+  posture minimal.
+- README's first-launch instructions no longer mention right-click
+  bypass; the signed build just opens.
+
+### Added
+- `.gitignore` now excludes `*.p8`, `*.p12`, `*.pem`, `*.cer` and
+  notarization log files so signing secrets can't be committed by
+  accident.
+
 ## [3.1.0] — 2026-04-29
 
 ### Added
