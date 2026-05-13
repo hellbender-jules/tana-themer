@@ -5,6 +5,33 @@ All notable changes to Tana Themer are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.3.2] — 2026-05-13
+
+### Fixed
+- **Claude theme widget panels now actually tint to the warm bg.**
+  v3.3.1 added 10 speculative variable overrides hoping one would
+  hit the widget-panel container. A definitive CDP-based introspection
+  of Tana's live CSS (see `scripts/inspect-tana-vars.js`) found that
+  the panels are controlled by `--colorWidgetPanelBackground`
+  (defaulting to `rgba(255, 255, 255, .8)` — semi-transparent white),
+  which is what was bleeding through. The v3.3.1 guesses were all
+  real Tana vars, just for *different* container types.
+- Also overrode `--colorNavigationGridItemBackground` (defaults to
+  hardcoded `white` in Tana) and a handful of other vars confirmed
+  to exist in Tana's stylesheet but to default to white/light values
+  not matching the Claude palette: `--colorPopoverPanelBackground`,
+  `--colorNavigationPanelBackground`, `--colorTopBarBackground`,
+  `--colorPanelToolbarBackground`, `--colorConfigBackground`,
+  `--colorAIChatPanelBackground`, `--colorUICardBackground`,
+  `--colorUICardBackgroundActive`.
+
+### Added
+- `scripts/inspect-tana-vars.js` — diagnostic utility that connects
+  to a running Tana session via CDP (port 9222) and enumerates every
+  CSS custom property Tana defines, with the values currently
+  resolving on `:root`. Useful for future theme development — strip
+  away guesswork by seeing exactly what variables Tana exposes.
+
 ## [3.3.1] — 2026-05-13
 
 ### Fixed
