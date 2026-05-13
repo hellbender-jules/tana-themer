@@ -5,6 +5,23 @@ All notable changes to Tana Themer are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.2.0] — 2026-04-29
+
+### Added
+- **Two new built-in themes** built on the Nord palette, split into
+  the two halves the official Nord designers themselves describe:
+  - **Nord Frost** — cool, icy. Polar Night backgrounds with the
+    four Frost colours (`#8fbcbb` teal, `#88c0d0` cyan, `#81a1c1`
+    medium blue, `#5e81ac` dark blue) driving every accent.
+  - **Nord Aurora** — warm, vivid. Same Polar Night base but
+    accents drawn from all five Aurora colours: green primary
+    links (`#a3be8c`), purple focus (`#b48ead`), orange
+    focus-within (`#d08770`), yellow highlights + bullets +
+    sidebar hover (`#ebcb8b`), red inline code (`#bf616a`).
+- Both themes are dark-mode, each set 54 CSS variables, and ship in
+  both the desktop `themes.js` and the browser userscript
+  (`tana-themer.user.js`, bumped to userscript `@version 1.2.0`).
+
 ## [3.1.1] — 2026-04-29
 
 ### Changed

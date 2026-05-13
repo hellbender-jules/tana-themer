@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         Tana Themer
 // @namespace    https://tana.inc/
-// @version      1.1.0
-// @description  Custom themes for Tana — Nord, Catppuccin, Rosé Pine, Warm Sepia, CoffeeBuddy, Charcoal
+// @version      1.2.0
+// @description  Custom themes for Tana — Nord, Nord Frost, Nord Aurora, Catppuccin, Rosé Pine, Warm Sepia, CoffeeBuddy, Charcoal
 // @author       Julian
 // @match        https://app.tana.inc/*
 // @grant        none
@@ -582,6 +582,161 @@
         '--colorButtonNeutralStroke':            '#464A4D',
         '--colorButtonNeutralText':              '#ABACAF',
         '--colorButtonNeutralHoverBackground':   '#3D4245',
+      },
+    },
+
+    // ─── Nord Frost ──────────────────────────────────────────
+    // Cool, icy half of the Nord palette. Polar Night backgrounds
+    // with the four Frost colours driving every accent.
+    'nord-frost': {
+      id: 'nord-frost',
+      name: 'Nord Frost',
+      mode: 'dark',
+      preview: ['#2e3440', '#88c0d0', '#eceff4'],
+      vars: {
+        '--colorPanelBackground':                '#2e3440',
+        '--colorPanelBackgroundDimmed':          '#3b4252',
+        '--colorPanelBackgroundHighlighted':     '#434c5e',
+        '--colorPanelBackgroundTransparent':     'rgba(46,52,64,0)',
+        '--colorNavigationAltPanelBackground':   '#3b4252',
+        '--colorUIContextMenuBackground':        '#3b4252',
+        '--colorCanvasBackground':               '#272c36',
+
+        '--colorEditorText':                     '#eceff4',
+        '--colorEditorTextHighlight':            '#ffffff',
+        '--colorEditorTextMuted':                '#a8b3cb',
+        '--colorUIText':                         '#d8dee9',
+        '--colorUITextMuted':                    '#8e96a8',
+        '--colorUITextDisabled':                 '#4c566a',
+        '--colorUITextOnHighlight':              '#2e3440',
+
+        '--colorLink':                           '#88c0d0',
+        '--colorLinkMuted':                      '#81a1c1',
+        '--colorHoverLink':                      '#8fbcbb',
+        '--colorFocus':                          '#8fbcbb',
+        '--colorFocusInactive':                  '#4c566a',
+        '--colorFocusWithin':                    '#5e81ac',
+        '--colorFocusText':                      '#88c0d0',
+
+        '--colorSelected':                       '#5e81ac',
+        '--colorSelectedUnfocused':              '#434c5e',
+        '--colorTextSelectedUnfocused':          '#4c566a',
+        '--colorTextHighlightedBackground':      '#3d4a5c',
+
+        '--colorUIStroke':                       '#4c566a',
+        '--colorUIStrokeSoft':                   '#3b4252',
+        '--colorUIStrokeHover':                  '#5e81ac',
+        '--colorUITupleStroke':                  '#3b4252',
+        '--colorUIListItemHovered':              '#434c5e',
+
+        '--colorBulletDefaultFill':              '#88c0d0',
+        '--colorBulletDefaultOutline':           '#4c566a',
+        '--colorBulletExpandLine':               '#3b4252',
+        '--colorBulletExpandLineSelected':       '#434c5e',
+        '--colorBulletExpandLineReference':      '#313847',
+        '--colorBulletExpandLineHoverBackground':'#434c5e',
+
+        '--colorNavigationCardBackgroundOpen':   '#434c5e',
+        '--colorNavigationCardStroke':           '#3b4252',
+        '--colorSidebarItemHoverBackground':     '#434c5e',
+        '--colorSidebarFadeColor':               '#2e3440',
+        '--colorSidebarItemHoverText':           '#eceff4',
+
+        '--colorTooltipBackground':              '#4c566a',
+        '--colorTooltipText':                    '#d8dee9',
+
+        '--inlineCode':                          '#8fbcbb',
+        '--inlineCodeBackground':                '#232830',
+
+        '--scrollbarForeground':                 'rgba(136,192,208,0.2)',
+        '--scrollbarForegroundHover':            'rgba(136,192,208,0.4)',
+        '--scrollbarForegroundActive':           'rgba(136,192,208,0.6)',
+
+        '--shadowSoft':                          '0px 0.1rem 0.1rem rgba(0,0,0,0.2), 0px 0.75rem 1.5rem rgba(0,0,0,0.3)',
+        '--shadowHard':                          '0px 0.1rem 0.1rem rgba(0,0,0,0.25)',
+
+        '--colorButtonNeutralBackground':        '#3b4252',
+        '--colorButtonNeutralStroke':            '#4c566a',
+        '--colorButtonNeutralText':              '#d8dee9',
+        '--colorButtonNeutralHoverBackground':   '#434c5e',
+      },
+    },
+
+    // ─── Nord Aurora ─────────────────────────────────────────
+    // Warm, vivid half of the Nord palette: green primary,
+    // purple focus, orange focus-within, yellow highlights,
+    // red inline code.
+    'nord-aurora': {
+      id: 'nord-aurora',
+      name: 'Nord Aurora',
+      mode: 'dark',
+      preview: ['#2e3440', '#a3be8c', '#ebcb8b'],
+      vars: {
+        '--colorPanelBackground':                '#2e3440',
+        '--colorPanelBackgroundDimmed':          '#3b4252',
+        '--colorPanelBackgroundHighlighted':     '#434c5e',
+        '--colorPanelBackgroundTransparent':     'rgba(46,52,64,0)',
+        '--colorNavigationAltPanelBackground':   '#3b4252',
+        '--colorUIContextMenuBackground':        '#3b4252',
+        '--colorCanvasBackground':               '#272c36',
+
+        '--colorEditorText':                     '#eceff4',
+        '--colorEditorTextHighlight':            '#ebcb8b',
+        '--colorEditorTextMuted':                '#b0a890',
+        '--colorUIText':                         '#d8dee9',
+        '--colorUITextMuted':                    '#8e96a8',
+        '--colorUITextDisabled':                 '#4c566a',
+        '--colorUITextOnHighlight':              '#2e3440',
+
+        '--colorLink':                           '#a3be8c',
+        '--colorLinkMuted':                      '#b6c89c',
+        '--colorHoverLink':                      '#ebcb8b',
+        '--colorFocus':                          '#b48ead',
+        '--colorFocusInactive':                  '#4c566a',
+        '--colorFocusWithin':                    '#d08770',
+        '--colorFocusText':                      '#a3be8c',
+
+        '--colorSelected':                       '#5d4d5e',
+        '--colorSelectedUnfocused':              '#434c5e',
+        '--colorTextSelectedUnfocused':          '#4c566a',
+        '--colorTextHighlightedBackground':      '#4c4439',
+
+        '--colorUIStroke':                       '#4c566a',
+        '--colorUIStrokeSoft':                   '#3b4252',
+        '--colorUIStrokeHover':                  '#b48ead',
+        '--colorUITupleStroke':                  '#3b4252',
+        '--colorUIListItemHovered':              '#434c5e',
+
+        '--colorBulletDefaultFill':              '#ebcb8b',
+        '--colorBulletDefaultOutline':           '#4c566a',
+        '--colorBulletExpandLine':               '#3b4252',
+        '--colorBulletExpandLineSelected':       '#4c4439',
+        '--colorBulletExpandLineReference':      '#2e2a26',
+        '--colorBulletExpandLineHoverBackground':'#434c5e',
+
+        '--colorNavigationCardBackgroundOpen':   '#434c5e',
+        '--colorNavigationCardStroke':           '#3b4252',
+        '--colorSidebarItemHoverBackground':     '#434c5e',
+        '--colorSidebarFadeColor':               '#2e3440',
+        '--colorSidebarItemHoverText':           '#ebcb8b',
+
+        '--colorTooltipBackground':              '#4c4439',
+        '--colorTooltipText':                    '#ebcb8b',
+
+        '--inlineCode':                          '#bf616a',
+        '--inlineCodeBackground':                '#2a2226',
+
+        '--scrollbarForeground':                 'rgba(163,190,140,0.3)',
+        '--scrollbarForegroundHover':            'rgba(163,190,140,0.5)',
+        '--scrollbarForegroundActive':           'rgba(180,142,173,0.6)',
+
+        '--shadowSoft':                          '0px 0.1rem 0.1rem rgba(0,0,0,0.2), 0px 0.75rem 1.5rem rgba(0,0,0,0.3)',
+        '--shadowHard':                          '0px 0.1rem 0.1rem rgba(0,0,0,0.25)',
+
+        '--colorButtonNeutralBackground':        '#3b4252',
+        '--colorButtonNeutralStroke':            '#4c566a',
+        '--colorButtonNeutralText':              '#d8dee9',
+        '--colorButtonNeutralHoverBackground':   '#4c4439',
       },
     },
 
