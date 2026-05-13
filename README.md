@@ -2,7 +2,7 @@
 
 Custom themes for [Tana](https://app.tana.inc) — works in both the **browser** (via Tampermonkey) and the **macOS desktop app** (via CDP injection).
 
-> **Status:** v3.2.0, MIT-licensed, signed + notarized. Tested on macOS 14+ with Tana 1.0+ and Node.js 18+. Not affiliated with Tana.
+> **Status:** v3.3.0, MIT-licensed, signed + notarized. Tested on macOS 14+ with Tana 1.0+ and Node.js 18+. Not affiliated with Tana.
 
 ## Themes included
 
@@ -10,6 +10,7 @@ Custom themes for [Tana](https://app.tana.inc) — works in both the **browser**
 |---|---|---|
 | **Tana Light** | Light | Tana default |
 | **Tana Dark** | Dark | Tana default |
+| **Claude** | Light | Inspired by claude.ai — warm off-white background (#faf9f5, not pure white), Anthropic terracotta accents, warm dark text |
 | **Nord** | Dark | Arctic, cool blues — [nordtheme.com](https://www.nordtheme.com) |
 | **Nord Frost** | Dark | Cool half of Nord — Polar Night + Frost cyans/teals/blues for every accent |
 | **Nord Aurora** | Dark | Warm half of Nord — Polar Night + Aurora greens/yellows/oranges/purples |

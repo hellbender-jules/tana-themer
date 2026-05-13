@@ -5,6 +5,20 @@ All notable changes to Tana Themer are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.3.0] — 2026-05-13
+
+### Added
+- **Claude** — a new built-in light theme inspired by claude.ai's
+  UI. The signature touch: the background is a warm off-white
+  (`#faf9f5`) rather than pure white, which reads as "white" but
+  feels softer for long-form work — the same effect Anthropic uses
+  in Claude itself. Anthropic terracotta (`#c96442`) drives every
+  accent: links, focus, bullets, inline-code text, scrollbars,
+  borders-on-hover. Text is warm dark grey (`#2a2520`) instead of
+  pure black, keeping the whole UI in the same warm temperature.
+- 54 vars, light mode, available in both desktop and browser
+  surfaces. Userscript `@version` bumped 1.2.0 → 1.3.0.
+
 ## [3.2.0] — 2026-04-29
 
 ### Added

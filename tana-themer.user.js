@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         Tana Themer
 // @namespace    https://tana.inc/
-// @version      1.2.0
-// @description  Custom themes for Tana — Nord, Nord Frost, Nord Aurora, Catppuccin, Rosé Pine, Warm Sepia, CoffeeBuddy, Charcoal
+// @version      1.3.0
+// @description  Custom themes for Tana — Claude, Nord, Nord Frost, Nord Aurora, Catppuccin, Rosé Pine, Warm Sepia, CoffeeBuddy, Charcoal
 // @author       Julian
 // @match        https://app.tana.inc/*
 // @grant        none
@@ -737,6 +737,84 @@
         '--colorButtonNeutralStroke':            '#4c566a',
         '--colorButtonNeutralText':              '#d8dee9',
         '--colorButtonNeutralHoverBackground':   '#4c4439',
+      },
+    },
+
+    // ─── Claude ──────────────────────────────────────────────
+    // Inspired by claude.ai. Warm off-white background (#faf9f5
+    // — not pure white), Anthropic terracotta accents, warm dark
+    // text. Light mode for long-form writing.
+    'claude': {
+      id: 'claude',
+      name: 'Claude',
+      mode: 'light',
+      preview: ['#faf9f5', '#c96442', '#2a2520'],
+      vars: {
+        '--colorPanelBackground':                '#faf9f5',
+        '--colorPanelBackgroundDimmed':          '#f0ebe1',
+        '--colorPanelBackgroundHighlighted':     '#ebe5d6',
+        '--colorPanelBackgroundTransparent':     'rgba(250,249,245,0)',
+        '--colorNavigationAltPanelBackground':   '#f0ebe1',
+        '--colorUIContextMenuBackground':        '#faf9f5',
+        '--colorCanvasBackground':               '#f7f5ef',
+
+        '--colorEditorText':                     '#2a2520',
+        '--colorEditorTextHighlight':            '#1f1d1a',
+        '--colorEditorTextMuted':                '#8a8175',
+        '--colorUIText':                         '#4a4339',
+        '--colorUITextMuted':                    '#8a8175',
+        '--colorUITextDisabled':                 '#c9c1b3',
+        '--colorUITextOnHighlight':              '#faf9f5',
+
+        '--colorLink':                           '#c96442',
+        '--colorLinkMuted':                      '#b85a3a',
+        '--colorHoverLink':                      '#a64a30',
+        '--colorFocus':                          '#c96442',
+        '--colorFocusInactive':                  '#d6d1c4',
+        '--colorFocusWithin':                    '#d97a5a',
+        '--colorFocusText':                      '#c96442',
+
+        '--colorSelected':                       '#f5e6dc',
+        '--colorSelectedUnfocused':              '#efe9da',
+        '--colorTextSelectedUnfocused':          '#6b6359',
+        '--colorTextHighlightedBackground':      '#fde8d6',
+
+        '--colorUIStroke':                       '#e8e3d5',
+        '--colorUIStrokeSoft':                   '#f0ebe1',
+        '--colorUIStrokeHover':                  '#c96442',
+        '--colorUITupleStroke':                  '#efe9da',
+        '--colorUIListItemHovered':              '#f5f1e8',
+
+        '--colorBulletDefaultFill':              '#c96442',
+        '--colorBulletDefaultOutline':           '#d6d1c4',
+        '--colorBulletExpandLine':               '#e8e3d5',
+        '--colorBulletExpandLineSelected':       '#d6d1c4',
+        '--colorBulletExpandLineReference':      '#f0ebe1',
+        '--colorBulletExpandLineHoverBackground':'#f5f1e8',
+
+        '--colorNavigationCardBackgroundOpen':   '#f5f1e8',
+        '--colorNavigationCardStroke':           '#e8e3d5',
+        '--colorSidebarItemHoverBackground':     '#f5f1e8',
+        '--colorSidebarFadeColor':               '#faf9f5',
+        '--colorSidebarItemHoverText':           '#2a2520',
+
+        '--colorTooltipBackground':              '#2a2520',
+        '--colorTooltipText':                    '#faf9f5',
+
+        '--inlineCode':                          '#c96442',
+        '--inlineCodeBackground':                '#f5e6dc',
+
+        '--scrollbarForeground':                 'rgba(201,100,66,0.2)',
+        '--scrollbarForegroundHover':            'rgba(201,100,66,0.4)',
+        '--scrollbarForegroundActive':           'rgba(201,100,66,0.6)',
+
+        '--shadowSoft':                          '0px 0.1rem 0.1rem rgba(74,67,57,0.08), 0px 0.75rem 1.5rem rgba(74,67,57,0.12)',
+        '--shadowHard':                          '0px 0.1rem 0.1rem rgba(74,67,57,0.18)',
+
+        '--colorButtonNeutralBackground':        '#f0ebe1',
+        '--colorButtonNeutralStroke':            '#d6d1c4',
+        '--colorButtonNeutralText':              '#2a2520',
+        '--colorButtonNeutralHoverBackground':   '#e8e3d5',
       },
     },
 
