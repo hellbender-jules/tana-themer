@@ -129,10 +129,20 @@ mkdir -p "$DIST_DIR"
 rm -f "$DIST_DIR/$ZIP_NAME"
 ditto -c -k --sequesterRsrc --keepParent "$APP_PATH" "$DIST_DIR/$ZIP_NAME"
 
+# ── Sync the signed + stapled bundle back to the project root ───────────────
+# So the .app sitting next to the source files is always the latest
+# signed build, ready to double-click for local testing. The
+# _CodeSignature/ dir and CodeResources file are .gitignore'd, so this
+# doesn't pollute git status.
+echo "▸ Syncing signed bundle back to project root"
+rm -rf "$APP_SOURCE"
+ditto "$APP_PATH" "$APP_SOURCE"
+spctl -a -vv --type execute "$APP_SOURCE" || true
+
 echo ""
 echo "✓ Signed, notarized, stapled."
-echo "✓ Dist:   $DIST_DIR/$ZIP_NAME"
-echo "✓ Bundle: $APP_PATH"
+echo "✓ Dist:        $DIST_DIR/$ZIP_NAME"
+echo "✓ Project app: $APP_SOURCE"
 echo ""
 echo "Verify on a test machine:"
 echo "  curl -L -o /tmp/$ZIP_NAME <release-url>"

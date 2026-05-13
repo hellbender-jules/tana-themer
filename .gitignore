@@ -24,3 +24,9 @@ Thumbs.db
 *.cer
 notarization-*.json
 notarization.log
+
+# Code signature artifacts left behind by sign-and-notarize.sh
+# (the .app committed to git is the unsigned source — signatures
+# are generated locally per build and shouldn't be tracked)
+Tana Themer.app/Contents/_CodeSignature/
+Tana Themer.app/Contents/CodeResources
