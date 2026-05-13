@@ -10,6 +10,19 @@ Agent-readable notes for working on **Tana Themer**.
 
 It captures things that took past sessions a while to figure out, plus the tooling that makes those things one-shot the next time. Skim the relevant section, don't rederive.
 
+## TL;DR — every release does all of this, every time
+
+1. Bump `Info.plist` version
+2. CHANGELOG entry
+3. README status line
+4. `bash scripts/sign-and-notarize.sh` (full rebuild + sign + notarize + staple + sync back to project root)
+5. `git commit && git tag vX.Y.Z && git push origin main --tags`
+6. `gh release create vX.Y.Z dist/tana-themer-X.Y.Z.zip …`
+7. **NotePlan #own-dev bullet** for today (`mcp__noteplan__noteplan_edit_content`)
+8. **Tana #code update** — bump CodeBuild + add child note under node `oaN2rs3n7R8S` (`mcp__tana-local__set_field_content` + `mcp__tana-local__import_tana_paste`)
+
+Steps 1–6 are public-repo standard. Steps 7–8 are Julian's standard for any code work (see "Maintainer logging" below). Both are required, not optional. Full detail in "Common workflows → Release workflow" further down.
+
 ---
 
 ## How themes work (architecture in 60 seconds)
@@ -162,6 +175,23 @@ Once the theme work is done and committed locally:
    EOF
    )"
    ```
+
+7. **Log to NotePlan #own-dev** *(maintainer-specific — see "Maintainer logging" below).* One-line bullet appended to today's daily note, summarising what shipped. Required, not optional — Julian's standard is to log every code task to NotePlan immediately, not at session end.
+
+8. **Log to Tana #code** *(maintainer-specific — see "Maintainer logging" below).* Bump the `CodeBuild` field on the project's parent node and append a child note describing the release.
+
+#### Maintainer logging
+
+This project's parent #code node in Tana is **`oaN2rs3n7R8S`** ("Tana Theme in App and Browser" under Julian's Daily notes). Every release should:
+
+- **Tana** — call `mcp__tana-local__set_field_content` to increment `CodeBuild` (fieldId `xOgoSzux0lIB`) by 1, then `mcp__tana-local__import_tana_paste` to add a child block under `oaN2rs3n7R8S` describing the release (one bullet per significant change, plus a "Release: <github-url>" line and "Build: <new-number>" line).
+- **NotePlan** — call `mcp__noteplan__noteplan_edit_content` with action `append`, type `bullet`, date today (`YYYYMMDD`), content beginning with `* ` and ending with `#own-dev`. One concise line, descriptive enough to read at a glance later.
+
+Field IDs, option IDs, the Status enum, and the rest of Julian's global Tana conventions are in `~/.claude/CLAUDE.md` ("Tana Integration — #code Tag" section). Don't duplicate them here — single source of truth.
+
+The Tana MCP server is sometimes flaky; if `import_tana_paste` returns "Unable to connect," retry once or twice before giving up. If it stays down, surface that to the user with the URL of the release so they can paste a note manually.
+
+Skip both 7 and 8 only if you have a clear reason (e.g. running in a fork that's not Julian's). Otherwise they're as required as the version bump.
 
 #### Pitfall: pre-requisites for signing
 
