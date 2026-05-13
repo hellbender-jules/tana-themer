@@ -598,6 +598,20 @@ const THEMES = {
       '--colorNavigationAltPanelBackground':   '#f0ebe1',
       '--colorUIContextMenuBackground':        '#faf9f5',
       '--colorCanvasBackground':               '#f7f5ef',
+      // Speculative widget / overlay backgrounds — these may or may
+      // not exist as Tana vars. Harmless if Tana doesn't reference
+      // them; if it does, widget panels (Late / Today / Triage etc)
+      // get tinted to match the main background.
+      '--colorWidgetBackground':               '#faf9f5',
+      '--colorOverlayBackground':              '#faf9f5',
+      '--colorMenuBackground':                 '#faf9f5',
+      '--colorCardBackground':                 '#faf9f5',
+      '--colorPopoverBackground':              '#faf9f5',
+      '--colorPanelOverlay':                   '#faf9f5',
+      '--colorSurfaceBackground':              '#faf9f5',
+      '--colorListPanelBackground':            '#faf9f5',
+      '--colorSavedSearchBackground':          '#faf9f5',
+      '--colorFloatingPanelBackground':        '#faf9f5',
       '--colorEditorText':                     '#2a2520',
       '--colorEditorTextHighlight':            '#1f1d1a',
       '--colorEditorTextMuted':                '#8a8175',

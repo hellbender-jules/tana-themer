@@ -2,7 +2,7 @@
 
 Custom themes for [Tana](https://app.tana.inc) — works in both the **browser** (via Tampermonkey) and the **macOS desktop app** (via CDP injection).
 
-> **Status:** v3.3.0, MIT-licensed, signed + notarized. Tested on macOS 14+ with Tana 1.0+ and Node.js 18+. Not affiliated with Tana.
+> **Status:** v3.3.1, MIT-licensed, signed + notarized. Tested on macOS 14+ with Tana 1.0+ and Node.js 18+. Not affiliated with Tana.
 
 ## Themes included
 

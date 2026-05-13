@@ -5,6 +5,20 @@ All notable changes to Tana Themer are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.3.1] — 2026-05-13
+
+### Fixed
+- **Claude theme: side widget panels stayed pure white** while the
+  main editor showed the warm off-white background. The Late /
+  Today / Triage / Inbox cards on the home view reference a CSS
+  variable that none of the existing themes had been overriding.
+  Added 10 speculative widget / overlay / card background variable
+  overrides — Tana ignores the ones it doesn't use, applies the
+  ones it does, so widget panels now match the main background.
+  The fix is scoped to the Claude theme; other light themes
+  (Warm Sepia, CoffeeBuddy Pro) likely have the same issue and
+  can be patched the same way if anyone reports it.
+
 ## [3.3.0] — 2026-05-13
 
 ### Added
