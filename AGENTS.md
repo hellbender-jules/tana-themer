@@ -23,6 +23,8 @@ It captures things that took past sessions a while to figure out, plus the tooli
 
 Steps 1–6 are public-repo standard. Steps 7–8 are Julian's standard for any code work (see "Maintainer logging" below). Both are required, not optional. Full detail in "Common workflows → Release workflow" further down.
 
+**For risky / experimental / vague-spec work** — don't go straight to this checklist. Use a feature branch first, build + test it from there, only merge to `main` once it's proven. See "Branch-based development" further down for the policy + workflow.
+
 ---
 
 ## How themes work (architecture in 60 seconds)
@@ -208,6 +210,104 @@ Skip both 7 and 8 only if you have a clear reason (e.g. running in a fork that's
   (For Julian's setup: the API key is at `/Users/julian/Documents/AI-DIR/AuthKey_TC2967UH6C.p8`, Key ID `TC2967UH6C`. The Issuer ID has to come from App Store Connect → Users and Access → Integrations.)
 
 If either is missing the script will say so and exit.
+
+---
+
+## Branch-based development (for risky changes)
+
+Default policy: **branch automatically when there are risk signals**, work directly on `main` otherwise. The goal is that experimental work never has the chance to break `main`, while small confident changes don't pay branching overhead.
+
+### Risk signals — branch on these without being asked
+
+- The user uses words like *"new idea"*, *"experimental"*, *"try this"*, *"see if it works"*, *"big change"*, *"not sure"*, *"might be wrong"*.
+- The change crosses many files or refactors core logic.
+- The change can't be verified cheaply (e.g. needs the user to test in Tana over a few days).
+- Requirements are vague — we're still discovering what we want.
+
+### Direct-on-`main` is fine for
+
+- Small bug fixes (one or two files).
+- Theme tweaks (colour adjustments).
+- Docs-only changes.
+- Anything where the user has clearly already decided what they want.
+
+### User overrides
+
+- **"Use a branch for this"** → branch even for trivial work.
+- **"Work directly on main"** → skip the branch even for risky work.
+
+### Branch lifecycle, end to end
+
+**A. Create the branch.**
+```bash
+git checkout -b feat/<short-descriptive-name>
+```
+
+**B. Develop on the branch.** Commits go to the branch, not `main`. `main` stays untouched throughout.
+
+**C. Build a testable, signed `.app` from the branch.**
+```bash
+# Optional: mark the version so it's distinguishable from main builds
+# Edit Info.plist CFBundleShortVersionString to "X.Y.Z-dev" or "X.Y.Z-rc1"
+
+bash scripts/sign-and-notarize.sh
+```
+Identical pipeline to a real release — produces a signed, notarized, stapled `.app` at the project root and a corresponding zip in `dist/`. Just no git tag, no GitHub release, no NotePlan/Tana logging.
+
+**D. Install the branch build for live testing.**
+Critical: **don't touch `/Applications/Tana Themer.app`**. That stays at the last-shipped `main` version as the rollback target. Install the branch build by opening the freshly-built project-root `.app` instead:
+```bash
+open "Tana Themer.app"   # from the project root, on the branch
+```
+Click **Enable** in the dialog → the dispatcher copies the BRANCH daemon to `~/Library/Application Support/TanaThemer/daemon/` and registers the LaunchAgent. Tana now runs with branch behaviour.
+
+**E. Decide.**
+
+If the branch is **good** → merge to `main` + ship a real release:
+```bash
+git checkout main
+git merge --ff-only feat/<name>             # or --no-ff for a merge commit
+# Bump Info.plist to the real next version (strip -dev/-rc suffix)
+# Update CHANGELOG, README status line
+bash scripts/sign-and-notarize.sh
+# Then run the full release-workflow steps 5–8: git tag + push, gh release create,
+# NotePlan #own-dev, Tana #code (see TL;DR at top of file)
+git branch -d feat/<name>
+git push origin --delete feat/<name>
+```
+
+If the branch is **bad** → throw it away and restore `main`'s installed state:
+```bash
+git checkout main
+git branch -D feat/<name>
+git push origin --delete feat/<name>
+# Restore main's daemon by re-Enabling the /Applications copy:
+open "/Applications/Tana Themer.app"
+# Click Disable when I quit Tana → quit Tana → reopen .app → Enable
+```
+`/Applications` is still at last-shipped `main`, so this fully restores the runtime.
+
+**F. Nuclear reset** (only if local state got weird during testing):
+1. Open `/Applications/Tana Themer.app` → More options… → Remove completely.
+2. Set Up & Enable from scratch.
+
+### Pitfalls
+
+- **The project-root `.app` reflects whatever branch you last ran `sign-and-notarize.sh` on.** It is NOT a snapshot of `main`. If you want the project-root `.app` to mirror `main` again, `git checkout main && bash scripts/sign-and-notarize.sh`, or just `gh release download` the latest main zip and `ditto -x -k` it into the project root.
+- **Don't bump version + tag + release on a branch.** Those happen only on merge to `main`. Branch builds can use `-dev` / `-rc1` / etc. in Info.plist for clarity but don't have to.
+- **Don't log to NotePlan or Tana for branch builds.** Steps 7 + 8 of the release workflow are for shipped main releases only. Branch work logs only when it merges.
+- **Don't push a `feat/*` branch without naming it descriptively.** It'll outlive its usefulness on origin if everyone forgets what `feat/wip` was for.
+
+### Quick reference
+
+| User says | I do |
+|---|---|
+| "I've got a new idea, big change, might not work" | Create `feat/<name>`, work there from the start |
+| "Let me test this before we merge" | Run `sign-and-notarize.sh` on the branch, tell user to open project-root `.app` |
+| "Looks good, ship it" | Merge to `main`, bump version properly, run full release pipeline (incl. NotePlan + Tana) |
+| "Scrap it" | Delete branch local + remote, reinstall main daemon via `/Applications/Tana Themer.app` |
+| "Use a branch even though this is small" | Branch anyway |
+| "Just do it on main" | Skip the branch even if risky |
 
 ---
 
