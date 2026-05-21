@@ -29,7 +29,7 @@ Steps 1–6 are public-repo standard. Steps 7–8 are Julian's standard for any 
 
 ## How themes work (architecture in 60 seconds)
 
-Tana Outliner's renderer (the Electron app at `/Applications/Tana.app`, or the web app at `app.tana.inc`) defines roughly **759 CSS custom properties** on the `<html>` element. Examples: `--colorPanelBackground`, `--colorWidgetPanelBackground`, `--colorLink`. Every visual surface in Tana Outliner — backgrounds, text colours, borders, scrollbars — reads its value from one of these variables.
+Tana Outliner's renderer (the Electron app at `/Applications/Tana Outliner.app`, or the web app at `app.tana.inc`) defines roughly **759 CSS custom properties** on the `<html>` element. Examples: `--colorPanelBackground`, `--colorWidgetPanelBackground`, `--colorLink`. Every visual surface in Tana Outliner — backgrounds, text colours, borders, scrollbars — reads its value from one of these variables.
 
 A Tana Themer "theme" is just **a subset of those variables, given new values**, scoped to a CSS class that Themer toggles on `<html>`.
 

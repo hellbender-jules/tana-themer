@@ -18,7 +18,8 @@ const path      = require('path');
 const { spawn, execSync } = require('child_process');
 const WebSocket = require('ws');
 
-const TANA_APP    = '/Applications/Tana.app/Contents/MacOS/Tana';
+const TANA_APP    = '/Applications/Tana Outliner.app/Contents/MacOS/Tana Outliner';
+const TANA_PROC   = 'Tana Outliner';
 const DEBUG_PORT  = 9222;
 const POLL_MS     = 2000;
 const REINJECT_MS = 2000;
@@ -119,7 +120,7 @@ function removeFile(p) {
 
 function isTanaRunning() {
   try {
-    execSync('pgrep -x Tana', { stdio: 'ignore' });
+    execSync(`pgrep -x ${JSON.stringify(TANA_PROC)}`, { stdio: 'ignore' });
     return true;
   } catch (_) {
     return false;
@@ -248,9 +249,9 @@ async function connectAndInject() {
 }
 
 function relaunchTanaWithDebug() {
-  log('Relaunching Tana with --remote-debugging-port=' + DEBUG_PORT);
+  log(`Relaunching ${TANA_PROC} with --remote-debugging-port=` + DEBUG_PORT);
   try {
-    execSync('pkill -x Tana', { stdio: 'ignore' });
+    execSync(`pkill -x ${JSON.stringify(TANA_PROC)}`, { stdio: 'ignore' });
   } catch (_) {
     // not running
   }

@@ -51,7 +51,7 @@ is_agent_loaded() {
 }
 
 is_tana_running() {
-    pgrep -x Tana >/dev/null 2>&1
+    pgrep -x "Tana Outliner" >/dev/null 2>&1
 }
 
 is_cdp_open() {

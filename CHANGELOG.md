@@ -5,6 +5,23 @@ All notable changes to Tana Themer (themes for Tana Outliner) are documented in 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.3.4] — 2026-05-21
+
+### Fixed
+- **Theming now actually works against the renamed host app.** The Tana
+  desktop bundle has been renamed on disk to `/Applications/Tana
+  Outliner.app` with executable `Tana Outliner` (with the space). v3.3.3
+  was a labels-only update that left the daemon's hardcoded paths
+  pointing at the old `/Applications/Tana.app/Contents/MacOS/Tana` and
+  the process detector calling `pgrep -x Tana` — so on a machine where
+  the rename had landed, the daemon never detected the app, never
+  relaunched it with `--remote-debugging-port=9222`, and never injected.
+  v3.3.4 updates:
+  - `TANA_APP` constant in `tana-themer-daemon.js`
+  - `pgrep` / `pkill` invocations in both the daemon and the
+    `.app` dispatcher to target `"Tana Outliner"` (quoted because the
+    process name contains a space)
+
 ## [3.3.3] — 2026-05-21
 
 ### Changed

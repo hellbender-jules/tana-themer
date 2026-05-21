@@ -35,7 +35,7 @@ The desktop version runs as a silent background helper (LaunchAgent) — no term
 ### Prerequisites
 
 - macOS 11 or later
-- [Tana Outliner desktop app](https://tana.inc) installed at `/Applications/Tana.app`
+- [Tana Outliner desktop app](https://tana.inc) installed at `/Applications/Tana Outliner.app`
 - [Node.js](https://nodejs.org) 18 or later (`node -v` to check)
 
 ### Quick install (recommended)
