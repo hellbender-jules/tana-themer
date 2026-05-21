@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         Tana Themer
 // @namespace    https://tana.inc/
-// @version      1.3.0
-// @description  Custom themes for Tana — Claude, Nord, Nord Frost, Nord Aurora, Catppuccin, Rosé Pine, Warm Sepia, CoffeeBuddy, Charcoal
+// @version      1.4.0
+// @description  Custom themes for Tana Outliner — Claude, Nord, Nord Frost, Nord Aurora, Catppuccin, Rosé Pine, Warm Sepia, CoffeeBuddy, Charcoal
 // @author       Julian
 // @match        https://app.tana.inc/*
 // @grant        none
@@ -33,10 +33,10 @@
 
   const THEMES = {
 
-    // ── Tana defaults (no overrides — just switches mode) ────────────────────
+    // ── Tana Outliner defaults (no overrides — just switches mode) ───────────
     'tana-light': {
       id: 'tana-light',
-      name: 'Tana Light',
+      name: 'Tana Outliner Light',
       mode: 'light',
       preview: ['#ffffff', '#297dd9', '#33343e'],
       vars: {},
@@ -44,7 +44,7 @@
 
     'tana-dark': {
       id: 'tana-dark',
-      name: 'Tana Dark',
+      name: 'Tana Outliner Dark',
       mode: 'dark',
       preview: ['#1c1d22', '#297dd9', '#c9c8d4'],
       vars: {},

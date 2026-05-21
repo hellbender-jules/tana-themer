@@ -1,15 +1,15 @@
 # Tana Themer
 
-Custom themes for [Tana](https://app.tana.inc) — works in both the **browser** (via Tampermonkey) and the **macOS desktop app** (via CDP injection).
+Custom themes for [Tana Outliner](https://app.tana.inc) — works in both the **browser** (via Tampermonkey) and the **macOS desktop app** (via CDP injection).
 
-> **Status:** v3.3.2, MIT-licensed, signed + notarized. Tested on macOS 14+ with Tana 1.0+ and Node.js 18+. Not affiliated with Tana.
+> **Status:** v3.3.3, MIT-licensed, signed + notarized. Tested on macOS 14+ with Tana Outliner 1.0+ and Node.js 18+. Not affiliated with Tana Outliner.
 
 ## Themes included
 
 | Theme | Mode | Description |
 |---|---|---|
-| **Tana Light** | Light | Tana default |
-| **Tana Dark** | Dark | Tana default |
+| **Tana Outliner Light** | Light | Tana Outliner default |
+| **Tana Outliner Dark** | Dark | Tana Outliner default |
 | **Claude** | Light | Inspired by claude.ai — warm off-white background (#faf9f5, not pure white), Anthropic terracotta accents, warm dark text |
 | **Nord** | Dark | Arctic, cool blues — [nordtheme.com](https://www.nordtheme.com) |
 | **Nord Frost** | Dark | Cool half of Nord — Polar Night + Frost cyans/teals/blues for every accent |
@@ -35,7 +35,7 @@ The desktop version runs as a silent background helper (LaunchAgent) — no term
 ### Prerequisites
 
 - macOS 11 or later
-- [Tana desktop app](https://tana.inc) installed at `/Applications/Tana.app`
+- [Tana Outliner desktop app](https://tana.inc) installed at `/Applications/Tana.app`
 - [Node.js](https://nodejs.org) 18 or later (`node -v` to check)
 
 ### Quick install (recommended)
@@ -46,7 +46,7 @@ The desktop version runs as a silent background helper (LaunchAgent) — no term
 4. Double-click it
 5. Click **Set Up & Enable** in the dialog that appears
 
-That's it. The helper runs in the background, auto-starts at login, and applies your theme to Tana whenever Tana is launched.
+That's it. The helper runs in the background, auto-starts at login, and applies your theme to Tana Outliner whenever Tana Outliner is launched.
 
 The release builds are **code-signed with a Developer ID and notarized by Apple**, so Gatekeeper opens them without prompts on macOS 11+ (including Sequoia, which removed the right-click → Open bypass for unsigned apps). To verify before installing:
 
@@ -67,7 +67,7 @@ open "/Applications/Tana Themer.app"
 
 ### Daily use
 
-Just launch Tana normally (Dock, Spotlight, anywhere). The first launch of each session blinks Tana once as the helper relaunches it with the debug port enabled — after that, Tana behaves normally with the theme applied.
+Just launch Tana Outliner normally (Dock, Spotlight, anywhere). The first launch of each session blinks Tana Outliner once as the helper relaunches it with the debug port enabled — after that, Tana Outliner behaves normally with the theme applied.
 
 ### Control panel actions
 
@@ -76,31 +76,31 @@ Open `Tana Themer.app` any time to see status and pick from:
 | State | Available actions |
 |---|---|
 | Not set up yet | **Set Up & Enable** |
-| Running | **Disable when I quit Tana**, **View logs**, **Remove completely** |
+| Running | **Disable when I quit Tana Outliner**, **View logs**, **Remove completely** |
 | Disable pending | **Cancel disable**, **View logs** |
 | Disabled (installed) | **Enable**, **View logs**, **Remove completely** |
 
-**Disable when I quit Tana** is deferred on purpose — your current Tana session is left untouched, and the helper exits the moment you next quit Tana yourself.
+**Disable when I quit Tana Outliner** is deferred on purpose — your current Tana Outliner session is left untouched, and the helper exits the moment you next quit Tana Outliner yourself.
 
 ### How the desktop injection works
 
 | Step | What happens |
 |---|---|
 | 1 | LaunchAgent starts the daemon at login (or when you click Enable) |
-| 2 | Daemon polls every 2 s for the Tana process |
-| 3 | If Tana is running without the debug port, daemon kills + relaunches it with `--remote-debugging-port=9222` |
+| 2 | Daemon polls every 2 s for the Tana Outliner process |
+| 3 | If Tana Outliner is running without the debug port, daemon kills + relaunches it with `--remote-debugging-port=9222` |
 | 4 | Daemon opens a CDP WebSocket and evaluates `window.__TT_THEMES__ = {...}` |
 | 5 | Evaluates `desktop-ui.js` — same picker + CSS logic as the Tampermonkey script |
 | 6 | Listens for `Page.frameNavigated` and re-injects on each navigation |
 
-Theme preference is saved to Tana's own `localStorage`, so your choice persists across restarts.
+Theme preference is saved to Tana Outliner's own `localStorage`, so your choice persists across restarts.
 
 ### File overview
 
 | File | Purpose |
 |---|---|
 | `themes.js` | Single source of truth — all theme objects |
-| `desktop-ui.js` | Renderer-side script injected into Tana's Electron window via CDP |
+| `desktop-ui.js` | Renderer-side script injected into Tana Outliner's Electron window via CDP |
 | `tana-themer-daemon.js` | Long-running Node daemon — polls, relaunches Tana, injects |
 | `run-daemon.sh` | LaunchAgent entrypoint — locates Node and execs the daemon |
 | `plist-template.xml` | LaunchAgent template (paths filled in at install time) |
@@ -119,13 +119,13 @@ Theme preference is saved to Tana's own `localStorage`, so your choice persists 
 
 ## Security
 
-Tana Themer launches Tana with `--remote-debugging-port=9222`, which opens a Chrome DevTools Protocol (CDP) port bound to `localhost`. Anything else that can run code as your user on the same machine could attach to that port and execute JavaScript inside Tana's renderer — same trust model as launching Chrome with `--remote-debugging-port`.
+Tana Themer launches Tana Outliner with `--remote-debugging-port=9222`, which opens a Chrome DevTools Protocol (CDP) port bound to `localhost`. Anything else that can run code as your user on the same machine could attach to that port and execute JavaScript inside Tana Outliner's renderer — same trust model as launching Chrome with `--remote-debugging-port`.
 
 Don't run Tana Themer on:
 - a shared / multi-user account
 - a machine where you don't trust everything else running as your user
 
-The injected CSS and picker UI are open-source in this repo and execute entirely in your local Tana renderer — nothing is sent over the network and no Tana data leaves your machine. Theme preference is stored in Tana's own `localStorage`.
+The injected CSS and picker UI are open-source in this repo and execute entirely in your local Tana Outliner renderer — nothing is sent over the network and no Tana Outliner data leaves your machine. Theme preference is stored in Tana Outliner's own `localStorage`.
 
 If you find a vulnerability, please open a GitHub issue (or, for sensitive reports, contact the repo owner privately).
 
@@ -135,7 +135,7 @@ There are two paths depending on whether the theme is for **you only** or for **
 
 ### Path A — Personal themes (desktop only, no rebuild)
 
-Drop a `.json` file into `~/Library/Application Support/TanaThemer/user-themes/`, restart Tana, done. The directory is created on Set Up & Enable and contains a `README.txt` and an `EXAMPLE.json.disabled` you can rename to `.json` and tweak.
+Drop a `.json` file into `~/Library/Application Support/TanaThemer/user-themes/`, restart Tana Outliner, done. The directory is created on Set Up & Enable and contains a `README.txt` and an `EXAMPLE.json.disabled` you can rename to `.json` and tweak.
 
 **JSON schema:**
 
@@ -159,7 +159,7 @@ Drop a `.json` file into `~/Library/Application Support/TanaThemer/user-themes/`
 - `mode` must be `"light"` or `"dark"`.
 - `vars` is any subset of the [CSS variables listed below](#key-variables) — you don't need them all.
 - Invalid JSON or missing required fields → file is **silently skipped** and a reason is appended to `~/Library/Logs/tana-themer.log`. Other themes still load.
-- Themes are reloaded each time the daemon attaches to Tana — quit Tana and reopen it to pick up new files. (Disable → Enable from the .app forces a daemon restart if needed.)
+- Themes are reloaded each time the daemon attaches to Tana Outliner — quit Tana Outliner and reopen it to pick up new files. (Disable → Enable from the .app forces a daemon restart if needed.)
 
 This path **only affects the desktop app**. The browser userscript has its themes embedded — see Path B if you want a theme available in both.
 
@@ -179,7 +179,7 @@ This appends a working starter entry to **both** files at the right spot, slugif
 1. Open `themes.js` and `tana-themer.user.js`, find the new block (search for the theme name), and tune the colour values.
 2. Run `bash scripts/install.sh` to rebuild and reinstall the desktop helper.
 3. Re-paste `tana-themer.user.js` into Tampermonkey if you also use the browser version.
-4. Open Tana → click 🎨 → pick your new theme.
+4. Open Tana Outliner → click 🎨 → pick your new theme.
 
 If you'd like your theme included for everyone, open a pull request — the scaffold output is exactly the form expected.
 
@@ -232,11 +232,11 @@ The variables you can put inside `vars` (Path A or B). All optional — set as m
 | `--colorTooltipBackground` | Tooltip background |
 | `--colorTooltipText` | Tooltip text |
 
-Tana uses a two-layer system:
+Tana Outliner uses a two-layer system:
 - **Primitive palette** — fixed color scales (`--colorGray100` … `--colorGray975`, etc.)
 - **Semantic tokens** — the variables above, which reference the palette
 
-You can reference Tana's primitives in your values:
+You can reference Tana Outliner's primitives in your values:
 
 ```js
 '--colorLink': 'var(--colorGreen400)'
@@ -256,7 +256,7 @@ Both the browser and desktop versions share the same CSS injection strategy:
 
 1. Read the saved theme from `localStorage` (key `tana-themer-active`)
 2. Add `html.isDarkMode` / `html.isLightMode` + `html.tana-theme-<id>` classes to `<html>`
-3. Inject a `<style id="tana-themer-styles">` block scoped to `html.isDarkMode.tana-theme-<id>` (or `isLightMode`) — same specificity as Tana's own rules, later in source order → wins without `!important`
+3. Inject a `<style id="tana-themer-styles">` block scoped to `html.isDarkMode.tana-theme-<id>` (or `isLightMode`) — same specificity as Tana Outliner's own rules, later in source order → wins without `!important`
 4. Inject a floating 🎨 picker button (`#tt-root`) into `document.body`
 
 The browser userscript (`tana-themer.user.js`) is self-contained and runs via Tampermonkey at `document-start`.

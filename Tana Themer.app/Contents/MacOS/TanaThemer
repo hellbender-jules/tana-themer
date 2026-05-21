@@ -134,8 +134,8 @@ install_files() {
         "$BUNDLE_PLIST_TEMPLATE" > "$PLIST_PATH"
 
     # Set up the user-themes directory with a README + disabled
-    # example file. Drop a .json file here and restart Tana to pick
-    # it up — no daemon restart needed.
+    # example file. Drop a .json file here and restart Tana Outliner
+    # to pick it up — no daemon restart needed.
     local user_themes_dir="$APP_SUPPORT/user-themes"
     mkdir -p "$user_themes_dir"
     if [ ! -f "$user_themes_dir/README.txt" ]; then
@@ -144,8 +144,8 @@ Tana Themer — Personal themes
 ==============================
 
 Drop a .json file in this directory to add a personal theme.
-Restart Tana (quit and reopen) to load new themes — no daemon
-restart needed. Invalid files are skipped and logged to
+Restart Tana Outliner (quit and reopen) to load new themes — no
+daemon restart needed. Invalid files are skipped and logged to
 ~/Library/Logs/tana-themer.log.
 
 Schema (see EXAMPLE.json.disabled for a working starter):
@@ -225,8 +225,8 @@ remove_completely() {
     rm -f "$LOG_PATH"
 }
 
-# Used when Disable is clicked while Tana is NOT running — no active session
-# to protect, so disable immediately rather than deferring.
+# Used when Disable is clicked while Tana Outliner is NOT running — no active
+# session to protect, so disable immediately rather than deferring.
 disable_now() {
     clear_enabled
     clear_pending_disable
@@ -251,19 +251,19 @@ action_enable_quiet() {
     load_agent
 }
 
-# Shared logic: when enabling and Tana is already running without the debug
-# port, ask the user whether to restart now or wait for next launch.
+# Shared logic: when enabling and Tana Outliner is already running without the
+# debug port, ask the user whether to restart now or wait for next launch.
 handle_enable_when_tana_running_check() {
     if is_tana_running && ! is_cdp_open; then
         local answer
         answer=$(show_dialog "Tana Themer" \
-            "Tana is already running. To apply the theme to this session, Tana needs to be restarted.\n\nRestart Tana now, or wait until you next launch it?" \
+            "Tana Outliner is already running. To apply the theme to this session, Tana Outliner needs to be restarted.\n\nRestart Tana Outliner now, or wait until you next launch it?" \
             "Wait until next launch" \
-            "Wait until next launch" "Restart Tana now")
+            "Wait until next launch" "Restart Tana Outliner now")
         case "$answer" in
-            "Restart Tana now")
+            "Restart Tana Outliner now")
                 clear_wait_to_attach
-                # Daemon will see Tana running without CDP and relaunch with the flag.
+                # Daemon will see Tana Outliner running without CDP and relaunch with the flag.
                 ;;
             "Wait until next launch"|"")
                 set_wait_to_attach
@@ -282,7 +282,7 @@ action_disable() {
     if is_tana_running; then
         set_pending_disable
         show_alert "Tana Themer" \
-            "Tana Themer will disable automatically when you quit Tana.\n\nYou can keep working in Tana with the theme until then."
+            "Tana Themer will disable automatically when you quit Tana Outliner.\n\nYou can keep working in Tana Outliner with the theme until then."
     else
         disable_now
         show_alert "Tana Themer" "Tana Themer has been disabled."
@@ -332,27 +332,27 @@ show_more_options_menu() {
 build_status_lines() {
     local lines=""
     if is_pending_disable; then
-        lines="Status:   Will disable when you quit Tana"
+        lines="Status:         Will disable when you quit Tana Outliner"
     elif is_enabled && is_agent_loaded; then
-        lines="Status:   Running (auto-starts at login)"
+        lines="Status:         Running (auto-starts at login)"
     elif is_enabled; then
-        lines="Status:   Enabled but agent not loaded"
+        lines="Status:         Enabled but agent not loaded"
     else
-        lines="Status:   Disabled"
+        lines="Status:         Disabled"
     fi
 
     if is_tana_running; then
         if is_cdp_open; then
-            lines="$lines\nTana:     Connected"
+            lines="$lines\nTana Outliner:  Connected"
         else
             if [ -f "$FLAG_WAIT_TO_ATTACH" ]; then
-                lines="$lines\nTana:     Running — will attach at next launch"
+                lines="$lines\nTana Outliner:  Running — will attach at next launch"
             else
-                lines="$lines\nTana:     Running"
+                lines="$lines\nTana Outliner:  Running"
             fi
         fi
     else
-        lines="$lines\nTana:     Not running"
+        lines="$lines\nTana Outliner:  Not running"
     fi
     echo "$lines"
 }

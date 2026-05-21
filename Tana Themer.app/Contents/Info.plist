@@ -2,31 +2,31 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-    <key>CFBundleExecutable</key>
-    <string>TanaThemer</string>
-    <key>CFBundleIdentifier</key>
-    <string>io.github.hellbendereu.tana-themer</string>
-    <key>CFBundleName</key>
-    <string>Tana Themer</string>
-    <key>CFBundleDisplayName</key>
-    <string>Tana Themer</string>
-    <key>CFBundleVersion</key>
-    <string>3.3.2</string>
-    <key>CFBundleShortVersionString</key>
-    <string>3.3.2</string>
-    <key>CFBundlePackageType</key>
-    <string>APPL</string>
-    <key>CFBundleSignature</key>
-    <string>????</string>
-    <key>LSMinimumSystemVersion</key>
-    <string>11.0</string>
-    <key>CFBundleIconFile</key>
-    <string>TanaThemer</string>
-    <key>NSHighResolutionCapable</key>
-    <true/>
-    <key>NSAppleEventsUsageDescription</key>
-    <string>Tana Themer uses Apple Events to manage its background helper and to relaunch Tana with the debugging port required for theme injection.</string>
-    <key>LSUIElement</key>
-    <false/>
+	<key>CFBundleDisplayName</key>
+	<string>Tana Themer</string>
+	<key>CFBundleExecutable</key>
+	<string>TanaThemer</string>
+	<key>CFBundleIconFile</key>
+	<string>TanaThemer</string>
+	<key>CFBundleIdentifier</key>
+	<string>io.github.hellbendereu.tana-themer</string>
+	<key>CFBundleName</key>
+	<string>Tana Themer</string>
+	<key>CFBundlePackageType</key>
+	<string>APPL</string>
+	<key>CFBundleShortVersionString</key>
+	<string>3.3.3</string>
+	<key>CFBundleSignature</key>
+	<string>????</string>
+	<key>CFBundleVersion</key>
+	<string>3.3.3</string>
+	<key>LSMinimumSystemVersion</key>
+	<string>11.0</string>
+	<key>LSUIElement</key>
+	<false/>
+	<key>NSAppleEventsUsageDescription</key>
+	<string>Tana Themer uses Apple Events to manage its background helper and to relaunch Tana Outliner with the debugging port required for theme injection.</string>
+	<key>NSHighResolutionCapable</key>
+	<true/>
 </dict>
 </plist>

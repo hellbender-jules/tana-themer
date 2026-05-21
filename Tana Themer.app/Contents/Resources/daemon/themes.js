@@ -11,12 +11,12 @@
 const THEMES = {
 
   'tana-light': {
-    id: 'tana-light', name: 'Tana Light', mode: 'light',
+    id: 'tana-light', name: 'Tana Outliner Light', mode: 'light',
     preview: ['#ffffff', '#297dd9', '#33343e'], vars: {},
   },
 
   'tana-dark': {
-    id: 'tana-dark', name: 'Tana Dark', mode: 'dark',
+    id: 'tana-dark', name: 'Tana Outliner Dark', mode: 'dark',
     preview: ['#1c1d22', '#297dd9', '#c9c8d4'], vars: {},
   },
 

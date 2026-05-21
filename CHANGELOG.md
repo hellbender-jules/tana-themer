@@ -1,9 +1,24 @@
 # Changelog
 
-All notable changes to Tana Themer are documented in this file.
+All notable changes to Tana Themer (themes for Tana Outliner) are documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [3.3.3] — 2026-05-21
+
+### Changed
+- **Renamed product references from "Tana" to "Tana Outliner"** across
+  user-facing docs (README, AGENTS), the Apple Events usage description
+  shown in the macOS permission prompt, the userscript `@description`,
+  and the two default theme display names ("Tana Light" / "Tana Dark"
+  → "Tana Outliner Light" / "Tana Outliner Dark"). Theme IDs
+  (`tana-light`, `tana-dark`), CSS variable names, file paths
+  (`/Applications/Tana.app`), URLs (`app.tana.inc`), the repo name
+  (`tana-themer`), and all other code identifiers are unchanged — this
+  is a pure labelling update with no behavioural change. Existing
+  installs upgrade silently; saved theme preferences carry over by ID.
+- Userscript `@version` bumped 1.3.0 → 1.4.0 for the theme name change.
 
 ## [3.3.2] — 2026-05-13
 

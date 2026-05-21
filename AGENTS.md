@@ -5,7 +5,7 @@ Agent-readable notes for working on **Tana Themer**.
 **Read this first** when you are about to:
 - Add a new theme (built-in or personal)
 - Tweak an existing theme's colours
-- Debug a "this part of Tana isn't tinted correctly" report
+- Debug a "this part of Tana Outliner isn't tinted correctly" report
 - Cut a new release
 
 It captures things that took past sessions a while to figure out, plus the tooling that makes those things one-shot the next time. Skim the relevant section, don't rederive.
@@ -19,7 +19,7 @@ It captures things that took past sessions a while to figure out, plus the tooli
 5. `git commit && git tag vX.Y.Z && git push origin main --tags`
 6. `gh release create vX.Y.Z dist/tana-themer-X.Y.Z.zip …`
 7. **NotePlan #own-dev bullet** for today (`mcp__noteplan__noteplan_edit_content`)
-8. **Tana #code update** — bump CodeBuild + add child note under node `oaN2rs3n7R8S` (`mcp__tana-local__set_field_content` + `mcp__tana-local__import_tana_paste`)
+8. **Tana Outliner #code update** — bump CodeBuild + add child note under node `oaN2rs3n7R8S` (`mcp__tana-local__set_field_content` + `mcp__tana-local__import_tana_paste`)
 
 Steps 1–6 are public-repo standard. Steps 7–8 are Julian's standard for any code work (see "Maintainer logging" below). Both are required, not optional. Full detail in "Common workflows → Release workflow" further down.
 
@@ -29,7 +29,7 @@ Steps 1–6 are public-repo standard. Steps 7–8 are Julian's standard for any 
 
 ## How themes work (architecture in 60 seconds)
 
-Tana's renderer (the Electron app at `/Applications/Tana.app`, or the web app at `app.tana.inc`) defines roughly **759 CSS custom properties** on the `<html>` element. Examples: `--colorPanelBackground`, `--colorWidgetPanelBackground`, `--colorLink`. Every visual surface in Tana — backgrounds, text colours, borders, scrollbars — reads its value from one of these variables.
+Tana Outliner's renderer (the Electron app at `/Applications/Tana.app`, or the web app at `app.tana.inc`) defines roughly **759 CSS custom properties** on the `<html>` element. Examples: `--colorPanelBackground`, `--colorWidgetPanelBackground`, `--colorLink`. Every visual surface in Tana Outliner — backgrounds, text colours, borders, scrollbars — reads its value from one of these variables.
 
 A Tana Themer "theme" is just **a subset of those variables, given new values**, scoped to a CSS class that Themer toggles on `<html>`.
 
@@ -44,13 +44,13 @@ html.isLightMode.tana-theme-claude {
 }
 ```
 
-Because Tana's own stylesheets read these variables at render time, **any element using a variable you override is automatically tinted** — including elements that don't exist yet (new saved searches, new panels, future Tana features that use already-known vars). You're overriding the look-up table, not the elements.
+Because Tana Outliner's own stylesheets read these variables at render time, **any element using a variable you override is automatically tinted** — including elements that don't exist yet (new saved searches, new panels, future Tana Outliner features that use already-known vars). You're overriding the look-up table, not the elements.
 
 **Two surfaces, one source-of-truth-per-surface:**
 
 | Surface | Theme storage | Notes |
 |---|---|---|
-| macOS desktop app | `themes.js` (a Node module) | The daemon evaluates this into Tana's renderer via CDP. |
+| macOS desktop app | `themes.js` (a Node module) | The daemon evaluates this into Tana Outliner's renderer via CDP. |
 | Browser (Tampermonkey) | The `THEMES` object inside `tana-themer.user.js` | A separate copy. Kept in sync manually with `themes.js`. |
 
 Both files have a **marker comment** indicating where new themes get inserted:
@@ -73,7 +73,7 @@ Both files have a **marker comment** indicating where new themes get inserted:
 | `CHANGELOG.md` | Keep-a-Changelog format. | New entry per release. |
 | `README.md` | Themes table is a section. | Add a row when you add a built-in theme. |
 | `scripts/new-theme.sh` | Scaffolds a new built-in theme into both `themes.js` and `tana-themer.user.js`. | Adding a built-in theme. |
-| `scripts/inspect-tana-vars.js` | CDP-based introspection of Tana's live CSS variables. | Debugging "what variable controls X?" |
+| `scripts/inspect-tana-vars.js` | CDP-based introspection of Tana Outliner's live CSS variables. | Debugging "what variable controls X?" |
 | `scripts/sign-and-notarize.sh` | Full release pipeline: sign, notarize, staple, dist zip, sync back to project root. | Releases. |
 | `scripts/install.sh` | Dev-side: sync source into bundle, copy to /Applications, build dist zip. **Not signed.** | Local testing. For releases use `sign-and-notarize.sh`. |
 | `scripts/entitlements.plist` | Hardened-runtime entitlements for codesign. | Intentionally empty. Leave alone unless notarization fails and asks for a specific entitlement. |
@@ -104,17 +104,17 @@ This path is for users adding themes without contributing to the project. Docume
 
 1. Drop a `.json` file into `~/Library/Application Support/TanaThemer/user-themes/`
 2. Schema is identical to one entry from `themes.js`, expressed as JSON. See `~/Library/Application Support/TanaThemer/user-themes/EXAMPLE.json.disabled` for a working starter.
-3. Restart Tana. The daemon re-reads user themes on each CDP attach.
+3. Restart Tana Outliner. The daemon re-reads user themes on each CDP attach.
 
 If a user's theme has the same `id` as a built-in, it **replaces** the built-in for that install. The daemon logs the override to `~/Library/Logs/tana-themer.log`.
 
-### Fixing a "this Tana surface doesn't tint correctly" report
+### Fixing a "this Tana Outliner surface doesn't tint correctly" report
 
-A user reports that **a specific area** of Tana (e.g. widget panels on the home view) is showing default-Tana colours instead of theme colours. This means a CSS variable governs that surface and **the theme isn't overriding it**.
+A user reports that **a specific area** of Tana Outliner (e.g. widget panels on the home view) is showing default Tana Outliner colours instead of theme colours. This means a CSS variable governs that surface and **the theme isn't overriding it**.
 
 **Don't guess at variable names** — past sessions burned a whole release cycle (v3.3.1) on speculative overrides that turned out to be the wrong names. Use the inspector instead.
 
-1. Make sure Tana Themer is running (daemon attached, CDP port 9222 open). The easiest signal: `curl -fsS http://localhost:9222/json` returns JSON.
+1. Make sure Tana Themer is running (daemon attached, CDP port 9222 open). The easiest signal: `curl -fsS http://localhost:9222/json` returns JSON. (Tana Outliner must be open with the debug port.)
 
 2. Run the inspector:
    ```bash
@@ -122,7 +122,7 @@ A user reports that **a specific area** of Tana (e.g. widget panels on the home 
    ```
 
 3. The script prints:
-   - Total CSS variables Tana defines (~759 at time of writing).
+   - Total CSS variables Tana Outliner defines (~759 at time of writing).
    - All background-/panel-/widget-/surface-related vars with their current resolved values.
    - A scan of "white-ish panel-sized elements" in the DOM and their class names.
    - An attempted mapping from those elements to the CSS variable controlling their background.
@@ -135,7 +135,7 @@ A user reports that **a specific area** of Tana (e.g. widget panels on the home 
 
 #### Pitfall: similar variable names mean different things
 
-`--colorWidgetBackground` and `--colorWidgetPanelBackground` are **both real Tana vars** and they control **different** containers. Don't assume that overriding one is enough; the inspector will tell you which specific variable governs the element you care about. (See `CHANGELOG.md` for v3.3.1 vs v3.3.2 — the difference between those two releases is exactly this distinction.)
+`--colorWidgetBackground` and `--colorWidgetPanelBackground` are **both real Tana Outliner vars** and they control **different** containers. Don't assume that overriding one is enough; the inspector will tell you which specific variable governs the element you care about. (See `CHANGELOG.md` for v3.3.1 vs v3.3.2 — the difference between those two releases is exactly this distinction.)
 
 ### Release workflow
 
@@ -180,18 +180,18 @@ Once the theme work is done and committed locally:
 
 7. **Log to NotePlan #own-dev** *(maintainer-specific — see "Maintainer logging" below).* One-line bullet appended to today's daily note, summarising what shipped. Required, not optional — Julian's standard is to log every code task to NotePlan immediately, not at session end.
 
-8. **Log to Tana #code** *(maintainer-specific — see "Maintainer logging" below).* Bump the `CodeBuild` field on the project's parent node and append a child note describing the release.
+8. **Log to Tana Outliner #code** *(maintainer-specific — see "Maintainer logging" below).* Bump the `CodeBuild` field on the project's parent node and append a child note describing the release.
 
 #### Maintainer logging
 
-This project's parent #code node in Tana is **`oaN2rs3n7R8S`** ("Tana Theme in App and Browser" under Julian's Daily notes). Every release should:
+This project's parent #code node in Tana Outliner is **`oaN2rs3n7R8S`** ("Tana Theme in App and Browser" under Julian's Daily notes). Every release should:
 
-- **Tana** — call `mcp__tana-local__set_field_content` to increment `CodeBuild` (fieldId `xOgoSzux0lIB`) by 1, then `mcp__tana-local__import_tana_paste` to add a child block under `oaN2rs3n7R8S` describing the release (one bullet per significant change, plus a "Release: <github-url>" line and "Build: <new-number>" line).
+- **Tana Outliner** — call `mcp__tana-local__set_field_content` to increment `CodeBuild` (fieldId `xOgoSzux0lIB`) by 1, then `mcp__tana-local__import_tana_paste` to add a child block under `oaN2rs3n7R8S` describing the release (one bullet per significant change, plus a "Release: <github-url>" line and "Build: <new-number>" line).
 - **NotePlan** — call `mcp__noteplan__noteplan_edit_content` with action `append`, type `bullet`, date today (`YYYYMMDD`), content beginning with `* ` and ending with `#own-dev`. One concise line, descriptive enough to read at a glance later.
 
-Field IDs, option IDs, the Status enum, and the rest of Julian's global Tana conventions are in `~/.claude/CLAUDE.md` ("Tana Integration — #code Tag" section). Don't duplicate them here — single source of truth.
+Field IDs, option IDs, the Status enum, and the rest of Julian's global Tana Outliner conventions are in `~/.claude/CLAUDE.md` ("Tana Integration — #code Tag" section). Don't duplicate them here — single source of truth.
 
-The Tana MCP server is sometimes flaky; if `import_tana_paste` returns "Unable to connect," retry once or twice before giving up. If it stays down, surface that to the user with the URL of the release so they can paste a note manually.
+The Tana Outliner MCP server is sometimes flaky; if `import_tana_paste` returns "Unable to connect," retry once or twice before giving up. If it stays down, surface that to the user with the URL of the release so they can paste a note manually.
 
 Skip both 7 and 8 only if you have a clear reason (e.g. running in a fork that's not Julian's). Otherwise they're as required as the version bump.
 
@@ -221,7 +221,7 @@ Default policy: **branch automatically when there are risk signals**, work direc
 
 - The user uses words like *"new idea"*, *"experimental"*, *"try this"*, *"see if it works"*, *"big change"*, *"not sure"*, *"might be wrong"*.
 - The change crosses many files or refactors core logic.
-- The change can't be verified cheaply (e.g. needs the user to test in Tana over a few days).
+- The change can't be verified cheaply (e.g. needs the user to test in Tana Outliner over a few days).
 - Requirements are vague — we're still discovering what we want.
 
 ### Direct-on-`main` is fine for
@@ -252,14 +252,14 @@ git checkout -b feat/<short-descriptive-name>
 
 bash scripts/sign-and-notarize.sh
 ```
-Identical pipeline to a real release — produces a signed, notarized, stapled `.app` at the project root and a corresponding zip in `dist/`. Just no git tag, no GitHub release, no NotePlan/Tana logging.
+Identical pipeline to a real release — produces a signed, notarized, stapled `.app` at the project root and a corresponding zip in `dist/`. Just no git tag, no GitHub release, no NotePlan/Tana Outliner logging.
 
 **D. Install the branch build for live testing.**
 Critical: **don't touch `/Applications/Tana Themer.app`**. That stays at the last-shipped `main` version as the rollback target. Install the branch build by opening the freshly-built project-root `.app` instead:
 ```bash
 open "Tana Themer.app"   # from the project root, on the branch
 ```
-Click **Enable** in the dialog → the dispatcher copies the BRANCH daemon to `~/Library/Application Support/TanaThemer/daemon/` and registers the LaunchAgent. Tana now runs with branch behaviour.
+Click **Enable** in the dialog → the dispatcher copies the BRANCH daemon to `~/Library/Application Support/TanaThemer/daemon/` and registers the LaunchAgent. Tana Outliner now runs with branch behaviour.
 
 **E. Decide.**
 
@@ -271,7 +271,7 @@ git merge --ff-only feat/<name>             # or --no-ff for a merge commit
 # Update CHANGELOG, README status line
 bash scripts/sign-and-notarize.sh
 # Then run the full release-workflow steps 5–8: git tag + push, gh release create,
-# NotePlan #own-dev, Tana #code (see TL;DR at top of file)
+# NotePlan #own-dev, Tana Outliner #code (see TL;DR at top of file)
 git branch -d feat/<name>
 git push origin --delete feat/<name>
 ```
@@ -283,7 +283,7 @@ git branch -D feat/<name>
 git push origin --delete feat/<name>
 # Restore main's daemon by re-Enabling the /Applications copy:
 open "/Applications/Tana Themer.app"
-# Click Disable when I quit Tana → quit Tana → reopen .app → Enable
+# Click Disable when I quit Tana Outliner → quit Tana Outliner → reopen .app → Enable
 ```
 `/Applications` is still at last-shipped `main`, so this fully restores the runtime.
 
@@ -295,7 +295,7 @@ open "/Applications/Tana Themer.app"
 
 - **The project-root `.app` reflects whatever branch you last ran `sign-and-notarize.sh` on.** It is NOT a snapshot of `main`. If you want the project-root `.app` to mirror `main` again, `git checkout main && bash scripts/sign-and-notarize.sh`, or just `gh release download` the latest main zip and `ditto -x -k` it into the project root.
 - **Don't bump version + tag + release on a branch.** Those happen only on merge to `main`. Branch builds can use `-dev` / `-rc1` / etc. in Info.plist for clarity but don't have to.
-- **Don't log to NotePlan or Tana for branch builds.** Steps 7 + 8 of the release workflow are for shipped main releases only. Branch work logs only when it merges.
+- **Don't log to NotePlan or Tana Outliner for branch builds.** Steps 7 + 8 of the release workflow are for shipped main releases only. Branch work logs only when it merges.
 - **Don't push a `feat/*` branch without naming it descriptively.** It'll outlive its usefulness on origin if everyone forgets what `feat/wip` was for.
 
 ### Quick reference
@@ -304,7 +304,7 @@ open "/Applications/Tana Themer.app"
 |---|---|
 | "I've got a new idea, big change, might not work" | Create `feat/<name>`, work there from the start |
 | "Let me test this before we merge" | Run `sign-and-notarize.sh` on the branch, tell user to open project-root `.app` |
-| "Looks good, ship it" | Merge to `main`, bump version properly, run full release pipeline (incl. NotePlan + Tana) |
+| "Looks good, ship it" | Merge to `main`, bump version properly, run full release pipeline (incl. NotePlan + Tana Outliner) |
 | "Scrap it" | Delete branch local + remote, reinstall main daemon via `/Applications/Tana Themer.app` |
 | "Use a branch even though this is small" | Branch anyway |
 | "Just do it on main" | Skip the branch even if risky |
@@ -313,7 +313,7 @@ open "/Applications/Tana Themer.app"
 
 ## CSS variable reference (the categories that matter for theming)
 
-Tana defines ~759 vars. You don't need to override all of them — Tana inherits sensible defaults for everything you don't touch. But **for a comprehensive theme**, cover at least these categories:
+Tana Outliner defines ~759 vars. You don't need to override all of them — Tana Outliner inherits sensible defaults for everything you don't touch. But **for a comprehensive theme**, cover at least these categories:
 
 | Category | Representative vars |
 |---|---|
@@ -324,13 +324,13 @@ Tana defines ~759 vars. You don't need to override all of them — Tana inherits
 | **Accents** | `--colorLink`, `--colorLinkMuted`, `--colorHoverLink`, `--colorFocus`, `--colorFocusInactive`, `--colorFocusWithin`, `--colorFocusText` |
 | **Selection** | `--colorSelected`, `--colorSelectedUnfocused`, `--colorTextSelectedUnfocused`, `--colorTextHighlightedBackground` |
 | **Borders** | `--colorUIStroke`, `--colorUIStrokeSoft`, `--colorUIStrokeHover`, `--colorUITupleStroke`, `--colorUIListItemHovered` |
-| **Bullets (Tana's signature dots)** | `--colorBulletDefaultFill`, `--colorBulletDefaultOutline`, `--colorBulletExpandLine`, `--colorBulletExpandLineSelected`, `--colorBulletExpandLineReference`, `--colorBulletExpandLineHoverBackground` |
+| **Bullets (Tana Outliner's signature dots)** | `--colorBulletDefaultFill`, `--colorBulletDefaultOutline`, `--colorBulletExpandLine`, `--colorBulletExpandLineSelected`, `--colorBulletExpandLineReference`, `--colorBulletExpandLineHoverBackground` |
 | **Tooltips** | `--colorTooltipBackground`, `--colorTooltipText` |
 | **Inline code** | `--inlineCode`, `--inlineCodeBackground` |
 | **Scrollbars** | `--scrollbarForeground`, `--scrollbarForegroundHover`, `--scrollbarForegroundActive` (use rgba() with the theme's accent colour) |
 | **Shadows** | `--shadowSoft`, `--shadowHard` (use rgba() tinted toward the theme's text colour) |
 | **Buttons** | `--colorButtonNeutralBackground`, `--colorButtonNeutralStroke`, `--colorButtonNeutralText`, `--colorButtonNeutralHoverBackground` |
-| **AI Chat panels** | `--colorAIChatPanelBackground` (was hard to spot — Tana's AI chat container) |
+| **AI Chat panels** | `--colorAIChatPanelBackground` (was hard to spot — Tana Outliner's AI chat container) |
 | **Config panels** | `--colorConfigBackground` |
 
 The `claude` theme in `themes.js` is currently the **most comprehensive** (~74 vars overridden) and is a good template for new light themes. The `nord` theme is a good template for new dark themes (~50 vars).
@@ -341,7 +341,7 @@ A few vars are easy to miss:
 
 - `--colorNavigationGridItemBackground` defaults to **hardcoded `white`** (not a variable reference). If you don't override it on a light theme, sidebar grid items will be pure white even if everything else around them is warm.
 - `--colorWidgetPanelBackground` defaults to **`rgba(255, 255, 255, .8)`** (semi-transparent white). This governs the right-side widget cards (Late / Today / Triage / Inbox). Easy to miss because "widget" suggests a tiny element but it's the container.
-- Tana uses **`oklch()`** colour notation for many neutral greys (e.g. `oklch(.9520942425 .0000008619 240)`). These render as cool bluish greys. If you're building a warm theme and notice cool-grey patches in places like AI chat backgrounds or filter toolbars, override the `oklch()` vars too. The inspector script shows all of them.
+- Tana Outliner uses **`oklch()`** colour notation for many neutral greys (e.g. `oklch(.9520942425 .0000008619 240)`). These render as cool bluish greys. If you're building a warm theme and notice cool-grey patches in places like AI chat backgrounds or filter toolbars, override the `oklch()` vars too. The inspector script shows all of them.
 
 ---
 
@@ -349,7 +349,7 @@ A few vars are easy to miss:
 
 `scripts/inspect-tana-vars.js` is the **single most useful debugging tool** in this project. It:
 
-1. Connects to Tana via the CDP port (9222) the daemon already exposes.
+1. Connects to Tana Outliner via the CDP port (9222) the daemon already exposes.
 2. Reads every `--*` custom property defined in any stylesheet on the page.
 3. For each, resolves its current computed value on the `<html>` element.
 4. Walks the DOM looking for elements with near-white computed backgrounds and reports their class names — useful for "what's *that* panel?" questions.
@@ -421,6 +421,6 @@ If you're unsure between patch and minor, prefer minor for additions and patch f
 
 - **Dark mode for the Claude theme.** Currently only light. Anthropic's Claude has a dark mode too; would be a useful "Claude Dark" companion.
 - **CI auto-build on tag push.** GitHub Actions could run `scripts/sign-and-notarize.sh` and create the release automatically. Requires storing the Developer ID cert and notarytool credentials as encrypted GitHub Secrets. Not done — releases are local-only right now.
-- **A standardised theme test harness** that takes screenshots of every Tana surface under each theme. Manual smoke-test is the current state.
+- **A standardised theme test harness** that takes screenshots of every Tana Outliner surface under each theme. Manual smoke-test is the current state.
 - **The userscript `@author` field still says "Julian"** while everything else uses `hellbender-jules`. Flagged across sessions but never bundled with a release.
 - **Other light themes (Warm Sepia, CoffeeBuddy Pro) likely have the same `--colorWidgetPanelBackground` bug** as Claude did pre-v3.3.2. Nobody's reported them; if reported, apply the same fix.
